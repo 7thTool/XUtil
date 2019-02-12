@@ -1,8 +1,8 @@
 #include "XApi.hpp"
 
-namespace XUtil {
+XUtil::XApp *theApp = nullptr;
 
-XApp *theApp = nullptr;
+namespace XUtil {
 
 XApi::XApi() {}
 XApi::~XApi() {}
@@ -29,8 +29,15 @@ void XApi::term()
 {
 }
 
-XApp::XApp() {}
-XApp::~XApp() {}
+XApp::XApp() 
+{
+    theApp = this;
+}
+
+XApp::~XApp() 
+{
+
+}
 
 bool XApp::init(char *xml, int xmlflag)
 {

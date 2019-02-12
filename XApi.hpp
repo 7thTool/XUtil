@@ -37,9 +37,9 @@ namespace XUtil
 		bool init(char* xml, int xmlflag = 0);
 		void term();
 	};
-
-	extern XApp* theApp;
 }
+
+extern XUtil::XApp* theApp;
 
 #endif//_H_XApI_H_
 

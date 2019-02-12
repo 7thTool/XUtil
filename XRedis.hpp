@@ -21,7 +21,7 @@ enum ErrorCMD
 	REDIS_CONN_ERROR
 };
 
-class XRedis
+class XRedisConnect
 {
   protected:
 	class redisReplyGuard
@@ -39,10 +39,10 @@ class XRedis
 	};
 
   public:
-	XRedis() : context_(NULL)
+	XRedisConnect() : context_(NULL)
 	{
 	}
-	~XRedis()
+	~XRedisConnect()
 	{
 		if (context_)
 			redisFree(context_);
@@ -994,6 +994,118 @@ class XRedis
 
   private:
 	redisReply *m_reply;
+};
+
+class XRedisManager
+{
+public:
+	static bool SENTINEL_get_master_addr_by_name(const std::string& sentinel_ip, size_t sentinel_port, const std::string& master_name
+	, std::string& master_ip, size_t& master_port) {
+		std::stringstream sskey;
+		sskey << "SENTINEL get-master-addr-by-name " << master_name;
+		std::shared_ptr<XRedisConnect> redis_conn = std::make_shared< XRedisConnect>();
+        std::string err;
+        if (redis_conn->connect(sentinels_[i].ip,sentinels_[i].port,3000,&err)) {
+			std::string ip_port;
+			if(redis_conn->get(sskey.str(),ip_port, &err)) {
+				return true;
+			}
+		}
+		return false;
+	}
+    XRedisManager():ip_(),port_(0)
+    {
+       
+    }
+
+    ~XRedisManager()
+    {
+        stop();
+    }
+
+    bool start(const std::string& ip, size_t port, size_t conn_count = 3)
+    {
+		{
+			std::unique_lock<std::mutex> lock(mutex_);
+			ip_ = ip;
+			port_ = port_;
+		}
+        for (size_t i = 0; i < conn_count; i++)
+        {
+            std::shared_ptr<XRedisConnect> redis_conn = std::make_shared<XRedisConnect>();
+			std::string err;
+            if (!redis_conn->connect(ip_,port_,3000,&err)) {
+                redis_conn.reset();
+                return false;
+            }
+			push(redis_conn);
+        }
+        return true;
+    }
+
+    void stop()
+    {
+        std::unique_lock<std::mutex> lock(mutex_);
+		ip_.clear();
+		port_ = 0;
+		for (std::list<std::shared_ptr<XRedisConnect> >::iterator it = free_list_.begin(); it != free_list_.end(); it++)
+        {
+            std::shared_ptr<XRedisConnect> redis_conn = *it;
+            redis_conn.reset();
+        }
+        free_list_.clear();
+		cv_.notify_all();
+    }
+
+	inline bool is_run() {
+		return port_ != 0;
+	}
+
+    std::shared_ptr<XRedisConnect> pop()
+    {
+        std::unique_lock<std::mutex> lock(mutex_);
+        do {
+			if(!is_run()) {
+				return nullptr;
+			}
+            cv_.wait(lock);
+        } while (free_list_.empty());
+        std::shared_ptr<XRedisConnect> redis_conn = free_list_.front();
+        free_list_.pop_front();
+        return redis_conn;
+    }
+
+    void push(std::shared_ptr<XRedisConnect> conn)
+    {
+        std::unique_lock<std::mutex> lock(mutex_);
+		if(!is_run()) {
+			return;
+		}
+		if(ip_ != conn->ip() || port_ != conn->port()) {
+			return;
+		}
+        std::list<std::shared_ptr<XRedisConnect> >::iterator it = free_list_.begin();
+        for (; it != free_list_.end(); it++)
+        {
+            if (*it == conn) {
+                break;
+            }
+        }
+        if (it == free_list_.end()) {
+            free_list_.push_back(conn);
+        }
+        cv_.notify_one();
+    }
+
+    inline const std::string& ip() { return ip_; }
+    inline size_t port() { return port_; }
+
+private:
+	std::string ip_;
+	size_t port_;
+    std::list<std::shared_ptr<XRedisConnect>> free_list_;
+    std::mutex mutex_;
+    std::condition_variable cv_;
 };
 
 } // namespace XUtil

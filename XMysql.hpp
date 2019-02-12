@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <XUtil.hpp>
+#include "XUtil.hpp"
 #include <boost/circular_buffer.hpp>
 #include <mysql_connection.h>
 #include <mysql_driver.h>
@@ -15,6 +15,10 @@
 
 namespace XUtil
 {
+// tinyint 一个字节8位 （0，255） 的整型数据
+// smallint 两个字节16位 （-2^15 ，2^15 - 1） 的整型数据
+// int 4个字节32位 （-2^31，2^31 - 1） 的整型数据
+// bigint 8个字节64位 （-2^63，2^63 - 1） 的整型数据
 
 class DataBuf : public std::streambuf
 {
@@ -25,18 +29,18 @@ class DataBuf : public std::streambuf
     }
 };
 
-class Mysql_Pool;
-class Mysql_Conn
+class MysqlConnect
 {
   public:
-    Mysql_Conn(Mysql_Pool *mysql_pool)
+    MysqlConnect(const std::string &ip, size_t port,
+               const std::string &user, const std::string &pwd, const std::string &db, sql::Driver *driver)
+               :ip_(ip),port_(port),user_(user),pwd_(pwd),db_(db),driver_(driver)
     {
-        mysql_pool_ = mysql_pool;
         conn_ = nullptr;
         stmt_ = nullptr;
     }
 
-    virtual ~Mysql_Conn()
+    virtual ~MysqlConnect()
     {
         close();
     }
@@ -46,15 +50,15 @@ class Mysql_Conn
         close();
 
         std::stringstream ss;
-        ss << "tcp://" << mysql_pool_->get_server_ip() << ":" << mysql_pool_->get_server_port();
+        ss << "tcp://" << ip_ << ":" << port_;
         std::string url = ss.str();
         try
         {
-            conn_ = mysql_pool_->get_driver()->connect(url.c_str(), mysql_pool_->get_username(), mysql_pool_->get_passwrod());
-            conn_->setSchema(mysql_pool_->get_db_name());
+            conn_ = driver_->connect(url.c_str(), user_, pwd_);
+            conn_->setSchema(db_);
             if (conn_->isClosed())
             {
-                LOG4E("connect mysql error, url = [%s], user = [%s], password = [%s]", url.c_str(), mysql_pool_->get_username().c_str(), mysql_pool_->get_passwrod().c_str());
+                LOG4E("connect mysql error, url = [%s], user = [%s], password = [%s]", url.c_str(), user_.c_str(), pwd_.c_str());
                 return false;
             }
             else
@@ -85,30 +89,19 @@ class Mysql_Conn
         }
     }
 
-    inline bool is_connect()
-    {
-        return conn_ && !conn_.isClosed();
+    sql::PreparedStatement* create_pstmt(const std::string& str_sql) {
+        sql::PreparedStatement* pstmt = nullptr;
+        try {
+            pstmt = conn_->prepareStatement(str_sql);
+        } catch (sql::SQLException &e) {
+            int err_code = e.getErrorCode();
+            LOG4E("SQLException, MySQL Error Code = %d, SQLState = [%s], [%s]", err_code, e.getSQLState().c_str(), e.what());
+            return nullptr;
+        }
+        return pstmt;
     }
 
-    /*sql::PreparedStatement* create_pstmt(const char* str_sql) {
-	sql::PreparedStatement* pstmt = nullptr;
-
-	try {
-		pstmt = conn_->prepareStatement(str_sql);
-	} catch (sql::SQLException &e) {
-		int err_code = e.getErrorCode();
-		LOG4E("SQLException, MySQL Error Code = %d, SQLState = [%s], [%s]", err_code, e.getSQLState().c_str(), e.what());
-		return nullptr;
-	}
-	return pstmt;
-}*/
-
-    std::string &get_pool()
-    {
-        return mysql_pool_;
-    }
-
-    sql::ResultSet *execute_query(const char *str_sql)
+    sql::ResultSet *execute_query(const std::string& str_sql)
     {
         sql::ResultSet *res = nullptr;
         try
@@ -124,7 +117,7 @@ class Mysql_Conn
         return res;
     }
 
-    int execute_update(const char *str_sql)
+    int execute_update(const std::string& str_sql)
     {
         int ret = 0;
         try
@@ -140,7 +133,7 @@ class Mysql_Conn
         return ret;
     }
 
-    int execute(const char *str_sql)
+    int execute(const std::string& str_sql)
     {
         int ret = 0;
         try
@@ -156,146 +149,147 @@ class Mysql_Conn
         return ret;
     }
 
+    inline const std::string &get_server_ip() { return ip_; }
+    inline size_t get_server_port() { return port_; }
+    inline const std::string &get_username() { return user_; }
+    inline const std::string &get_passwrod() { return pwd_; }
+    inline const std::string &get_db_name() { return db_; }
+    inline sql::Driver *get_driver() { return driver_; }
+
   private:
-    Mysql_Pool *mysql_pool_;
+    const std::string ip_;
+    size_t port_;
+    const std::string user_;
+    const std::string pwd_;
+    const std::string db_;
+
+    sql::Driver *driver_;
     sql::Connection *conn_;
     sql::Statement *stmt_;
 };
 
-class Mysql_Pool
+class MysqlManager
 {
   public:
-    Mysql_Pool(const std::string &pool_name, const std::string &server_ip, size_t server_port,
-               const std::string &username, const std::string &password, const std::string &db_name, size_t max_conn_cnt)
+    MysqlManager(const std::string &ip, size_t port,
+               const std::string &user, const std::string &pwd, const std::string &db
+               , size_t max_conn_count = 15):ip_(ip),port_(port),user_(user),pwd_(pwd),db_(db),driver_(nullptr)
+    //MysqlManager()::ip_(),port_(0),user_(),pwd_(),db_(),driver_(nullptr)
     {
-        pool_name_ = pool_name;
-        server_ip_ = server_ip;
-        server_port_ = server_port;
-        username_ = username;
-        password_ = password;
-        db_name_ = db_name;
-        max_conn_cnt_ = max_conn_cnt;
-        cur_conn_cnt_ = 0;
-        driver_ = nullptr;
+       //
     }
 
-    virtual ~Mysql_Pool()
+    ~MysqlManager()
     {
         stop();
     }
 
-    bool start(size_t init_conn_cnt = 2)
+    // bool start(const std::string &ip, size_t port,
+    //            const std::string &user, const std::string &pwd, const std::string &db
+    bool start(
+               size_t conn_count = 3)
     {
-        try
         {
-            driver_ = get_driver_instance();
-        }
-        catch (sql::SQLException &e)
-        {
-            LOG4E("mysql驱动连接出错;\n");
-            return false;
-        }
-        catch (std::runtime_error &e)
-        {
-            LOG4E("mysql运行时错误\n");
-            return false;
-        }
-        cur_conn_cnt_ = init_conn_cnt;
-        for (int i = 0; i < cur_conn_cnt_; i++)
-        {
-            Mysql_Conn *mysql_conn = new Mysql_Conn(this);
-            if (!mysql_conn->connect())
-            {
-                delete mysql_conn;
+            std::unique_lock<std::mutex> lock(mutex_);
+            try {
+                driver_ = get_driver_instance();
+            }
+            catch (sql::SQLException &e) {
+                LOG4E("mysql驱动连接出错;\n");
+                return false;
+            } catch (std::runtime_error &e) {
+                LOG4E("mysql运行时错误\n");
                 return false;
             }
-            free_list_.push_back(mysql_conn);
+            // ip_ = ip;
+            // port_ = port;
+            // user_ = user;
+            // pwd_ = pwd;
+            // db_ = db;
         }
-
-        LOG4I("db pool: %s, size: %d", pool_name_.c_str(), (int)free_list_.size());
-        return 0;
+        for (int i = 0; i < conn_count; i++)
+        {
+            std::shared_ptr<MysqlConnect> mysql_conn = std::make_shared<MysqlConnect>(ip_,port_,user_,pwd_,db_,driver_);
+            if (!mysql_conn->connect()) {
+                mysql_conn.reset();
+                return false;
+            }
+            push(mysql_conn);
+        }
+        return true;
     }
 
     void stop()
     {
-        for (std::list<Mysql_Conn *>::iterator it = free_list_.begin(); it != free_list_.end(); it++)
+        std::unique_lock<std::mutex> lock(mutex_);
+        for (std::list<std::shared_ptr<MysqlConnect> >::iterator it = free_list_.begin(); it != free_list_.end(); it++)
         {
-            Mysql_Conn *mysql_conn = *it;
-            delete mysql_conn;
+            std::shared_ptr<MysqlConnect> mysql_conn = *it;
+            mysql_conn.reset();
         }
         free_list_.clear();
+        // ip_.clear();
+        // port_ = 0;
+        // user_.clear();
+        // pwd_.clear();
+        // db_.clear();
+        driver_ = nullptr;
+        cv_.notify_all();
     }
 
-    Mysql_Conn *pop()
+    inline bool is_run() {
+        return driver_ != nullptr && port_ != 0;
+    }
+
+    std::shared_ptr<MysqlConnect> pop()
     {
         std::unique_lock<std::mutex> lock(mutex_);
-        while (free_list_.empty())
-        {
-            if (cur_conn_cnt_ >= max_conn_cnt_)
-            {
-                cv_.wait(lock);
+        do {
+            if(!is_run()) {
+                return nullptr;
             }
-            else
-            {
-                Mysql_Conn *mysql_conn = new Mysql_Conn(this);
-                bool ret = mysql_conn->connect();
-                if (ret)
-                {
-                    delete mysql_conn;
-                    return nullptr;
-                }
-                else
-                {
-                    free_list_.push_back(mysql_conn);
-                    cur_conn_cnt_++;
-                    LOG4I("new db connection: %s, conn_cnt: %d", pool_name_.c_str(), cur_conn_cnt_);
-                }
-            }
-        }
-        Mysql_Conn *mysql_conn = free_list_.front();
+            cv_.wait(lock);
+        }while (free_list_.empty());
+        std::shared_ptr<MysqlConnect> mysql_conn = free_list_.front();
         free_list_.pop_front();
         return mysql_conn;
     }
 
-    void push(Mysql_Conn *conn)
+    void push(std::shared_ptr<MysqlConnect> conn)
     {
         std::unique_lock<std::mutex> lock(mutex_);
-        std::list<Mysql_Conn *>::iterator it = free_list_.begin();
+        if(!is_run()) {
+            return;
+        }
+        std::list<std::shared_ptr<MysqlConnect> >::iterator it = free_list_.begin();
         for (; it != free_list_.end(); it++)
         {
-            if (*it == conn)
-            {
+            if (*it == conn) {
                 break;
             }
         }
-        if (it == free_list_.end())
-        {
+        if (it == free_list_.end()) {
             free_list_.push_back(conn);
         }
         cv_.notify_one();
     }
-
-    inline std::string &get_pool_name() { return pool_name_; }
-    inline std::string &get_server_ip() { return server_ip_; }
-    inline size_t get_server_port() { return server_port_; }
-    inline std::string &get_username() { return username_; }
-    inline std::string &get_passwrod() { return password_; }
-    inline std::string &get_db_name() { return db_name_; }
-    inline sql::Driver *get_driver() { return driver_; }
-    inline size_t get_conn_count() { return cur_conn_cnt_; }
+    
+    inline const std::string &ip() { return ip_; }
+    inline size_t port() { return port_; }
+    inline const std::string &username() { return user_; }
+    inline const std::string &passwrod() { return pwd_; }
+    inline const std::string &db() { return db_; }
+    inline sql::Driver *driver() { return driver_; }
 
   private:
-    std::string pool_name_;
-    std::string server_ip_;
-    size_t server_port_;
-    std::string username_;
-    std::string password_;
-    std::string db_name_;
-    size_t cur_conn_cnt_;
-    size_t max_conn_cnt_;
+    const std::string ip_;
+    size_t port_;
+    const std::string user_;
+    const std::string pwd_;
+    const std::string db_;
 
     sql::Driver *driver_;
-    std::list<Mysql_Conn *> free_list_;
+    std::list<std::shared_ptr<MysqlConnect>> free_list_;
     std::mutex mutex_;
     std::condition_variable cv_;
 };
