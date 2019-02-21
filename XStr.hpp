@@ -4,7 +4,7 @@
 #include "XStr.h"
 #include "XUtil.hpp"
 #include <boost/locale.hpp>
-#include <boost/lexical_cast.hpp>  
+//#include <boost/lexical_cast.hpp>  
 
 namespace XUtil {
 	

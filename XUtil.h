@@ -3,6 +3,36 @@
 
 #pragma once
 
+#ifdef _WIN32
+    //define something for Windows (32-bit and 64-bit, this part is common)
+    #ifdef _WIN64
+        #warning "WIN64 os platform"
+    #else
+        #warning "WIN32 os platform"
+    #endif
+#elif __APPLE__
+    #include "TargetConditionals.h"
+    #if TARGET_IPHONE_SIMULATOR
+        #warning "iOS Simulator os platform"
+    #elif TARGET_OS_IPHONE
+        #warning "iOS device os platform"
+    #elif TARGET_OS_MAC
+        #warning "other Mac OS os platform"
+    #else
+        #warning "unknown Apple os platform"
+    #endif
+#elif __ANDROID__
+    #warning "android os platform"
+#elif __linux__
+    #warning "linux os platform"
+#elif __unix__ // all unices not caught above
+    #warning "unix os platform"
+#elif defined(_POSIX_VERSION)
+    #warning "POSIX os platform"
+#else
+    #error "unknown os platform"
+#endif
+
 #ifdef XUTIL_CONF
 #include <XUtilConf.h>
 #else
@@ -41,7 +71,12 @@
 #include <signal.h>
 #include <stdint.h>
 #include <unistd.h>
-#endif//
+#ifdef __APPLE__
+#include <machine/endian.h>
+#else
+#include <endian.h>
+#endif
+#endif
 
 #include <stdint.h>
 #include <stdio.h>

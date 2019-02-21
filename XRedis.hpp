@@ -9,7 +9,7 @@
 namespace XUtil
 {
 
-#define DEFAULT_expire_TIME 22 * 3600
+#define DEFAULT_EXPIRE_TIME 22 * 3600
 
 enum ErrorCMD
 {

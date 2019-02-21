@@ -27,6 +27,8 @@
 #include <algorithm>
 #include <functional>
 
+#include <bind>
+#include <function>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
@@ -35,17 +37,14 @@
 #include <boost/unordered_map.hpp>
 
 #include <boost/bind.hpp>
+#include <boost/function.hpp>
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 #include <boost/thread/tss.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/shared_mutex.hpp>
-#include <boost/atomic.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/array.hpp>
-#include <boost/function.hpp>
 #include <boost/date_time.hpp>
 #include <boost/any.hpp>
 
