@@ -23,18 +23,11 @@
 #include <sstream>
 #include <iostream>
 #include <iomanip>
-
 #include <algorithm>
 #include <functional>
-
-#include <bind>
-#include <function>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
-
-#include <boost/unordered_set.hpp>
-#include <boost/unordered_map.hpp>
 
 #include <boost/bind.hpp>
 #include <boost/function.hpp>

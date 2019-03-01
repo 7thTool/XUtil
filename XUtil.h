@@ -6,9 +6,9 @@
 #ifdef _WIN32
     //define something for Windows (32-bit and 64-bit, this part is common)
     #ifdef _WIN64
-        #warning "WIN64 os platform"
+        //#warning "WIN64 os platform"
     #else
-        #warning "WIN32 os platform"
+        //#warning "WIN32 os platform"
     #endif
 #elif __APPLE__
     #include "TargetConditionals.h"
