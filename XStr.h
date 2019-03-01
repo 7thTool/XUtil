@@ -21,9 +21,9 @@ typedef char	tchar;
 #define snprintf _snprintf
 #endif//snprintf
 
-//#ifndef vsprintf
-//#define vsprintf vsprintf_s
-//#endif//vsprintf
+#ifndef vsnprintf
+#define vsnprintf _vsnprintf
+#endif//vsnprintf
 
 #else
 
@@ -46,6 +46,40 @@ typedef char	tchar;
 #ifndef wcsnicmp
 #define wcsnicmp wcsncasecmp 
 #endif//wcsnicmp
+
+#ifndef strupr
+static char *_strupr(char *s)
+{
+	char *str;
+	str = s;
+	while(*str != '\0')
+	{
+		if(*str >= 'a' && *str <= 'z') {
+			*str += 'A'-'a';
+		}
+		str++;
+	}
+	return s;
+}
+#define strupr _strupr
+#endif//strupr
+
+#ifndef strlwr
+static char *_strlwr(char *s)
+{
+	char *str;
+	str = s;
+	while(*str != '\0')
+	{
+		if(*str >= 'A' && *str <= 'Z') {
+			*str += 'a'-'A';
+		}
+		str++;
+	}
+	return s;
+}
+#define strlwr _strlwr
+#endif//strlwr
 
 #endif//
 

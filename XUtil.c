@@ -1,22 +1,32 @@
-#include "XHelper.h"
+#include "XUtil.h"
+#include <math.h>
 
-namespace XBoost {
-	namespace Helper {
-		boost::filesystem::path get_initial_path() {
-			return boost::filesystem::initial_path<boost::filesystem::path>();
+int GetDecimalDigits(double v)
+{
+	int digits = 0;
+	double decimal = fmod(v, 1.);
+	if (!IsZeroFloat(decimal)) {
+#if 1
+		for (digits = 1;digits < 6;digits++)
+		{
+			double temp = decimal*pow(10., digits);
+			temp = fmod(temp, 1.);
+			if (IsZeroFloat(temp)) {
+				break;
+			}
 		}
-
-		boost::filesystem::path get_current_path() {
-			return boost::filesystem::current_path();
+#else
+		char buf[16] = { 0 };
+		sprintf(buf, "%.6lf", decimal);
+		for (digits = 6; digits > 0; digits--)
+		{
+			//x.xxxxxx
+			if (buf[1 + digits] != '0') {
+				break;
+			}
 		}
-
-		boost::filesystem::path get_program_path() {
-			return boost::dll::program_location();
-		}
-
-		boost::filesystem::path get_module_path() {
-			return boost::dll::this_line_location();
-		}
+#endif//
 	}
+	return digits;
 }
 

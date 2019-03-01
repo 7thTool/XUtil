@@ -225,6 +225,40 @@ namespace XUtil
 
 	//std::cout << one << std::endl;
 	//std::cout << mult.size() << std::endl;
+
+	template<class Ty>
+	char Sign(Ty x, Ty y)
+	{
+		if (x > y) {
+			return 1;
+		}
+		else if (x < y) {
+			return -1;
+		}
+		return 0;
+	}
+	template<class Ty>
+	char SignEx(Ty x, Ty y)
+	{
+		if (x >((Ty)(y + _zero_ctrl_))) {
+			return 1;
+		}
+		else if (x < ((Ty)-(y + _zero_ctrl_))) {
+			return -1;
+		}
+		return 0;
+	}
+	template<class Ty>
+	char SignEx(Ty x)
+	{
+		if (x >((Ty)_zero_ctrl_)) {
+			return 1;
+		}
+		else if (x < ((Ty)-_zero_ctrl_)) {
+			return -1;
+		}
+		return 0;
+	}
 } // namespace XUtil
 
 #endif //_H_XUTIL_HPP_

@@ -188,5 +188,7 @@ static bool IsEqualFloat(double x, double y) {
 #endif//
 #endif//
 
+int GetDecimalDigits(double v);
+
 #endif//_H_XUTIL_H_
 
