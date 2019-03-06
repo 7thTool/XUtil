@@ -17,7 +17,7 @@
     #elif TARGET_OS_IPHONE
         #warning "iOS device os platform"
     #elif TARGET_OS_MAC
-        #warning "other Mac OS os platform"
+        //#warning "other Mac OS os platform"
     #else
         #warning "unknown Apple os platform"
     #endif
@@ -69,6 +69,7 @@
 #include <sys/timeb.h>
 #include <pthread.h>
 #include <signal.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <unistd.h>
 #ifdef __APPLE__
@@ -93,7 +94,6 @@
 typedef unsigned char byte;
 typedef void* ptr_t;
 typedef void* handle_t;
-typedef ptrdiff_t int_t;
 //ptrdiff_t
 //ssize_t
 //size_t
