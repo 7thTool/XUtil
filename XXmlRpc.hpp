@@ -36,9 +36,9 @@ public:
 	public:
         Response(size_t p, bool e, const std::shared_ptr<boost::property_tree::ptree>& data, size_t id):Base(p, data, id) {
             if(e) {
-                error = json;
+                error = this->json;
             } else {
-                result = json;
+                result = this->json;
             }
         }
 		std::shared_ptr<boost::property_tree::ptree> error;
@@ -50,7 +50,7 @@ public:
 	public:
         Request(size_t p, const std::string& m, const std::shared_ptr<boost::property_tree::ptree>& data, size_t id
         , std::shared_ptr<std::promise<std::shared_ptr<Response>>> r):Base(p, data, id), method(m),response(r) { 
-            params = json;
+            params = this->json;
         }
 		std::string method;
 		std::shared_ptr<boost::property_tree::ptree> params;
