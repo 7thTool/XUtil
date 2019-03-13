@@ -1,7 +1,6 @@
-#ifndef __H_XLOGGER_HPP_
-#define __H_XLOGGER_HPP_
-
 #pragma once
+#ifndef __H_XDATETIME_HPP_
+#define __H_XDATETIME_HPP_
 
 #include "XUtil.hpp"
 
@@ -96,7 +95,7 @@ inline static std::vector<uint32_t> SumSUM_DAYS_OF_MONTH(bool leap_year)
 const std::vector<uint32_t> SUM_DAYS_OF_MONTH = SumSUM_DAYS_OF_MONTH(false);
 const std::vector<uint32_t> SUM_DAYS_OF_MONTH_LEAP = SumSUM_DAYS_OF_MONTH(true);
 //累计天数到某年，技巧：公元一年一月一日为星期一
-const std::vector<uint32_t> SUM_DAYS_OF_YEAR = [] -> bool { 
+const std::vector<uint32_t> SUM_DAYS_OF_YEAR = [] { 
 	std::vector<uint32_t> ret;
 	uint32_t sum = 0;
 	ret.push_back(sum); //第0年设0,无公元零年，填充0
@@ -178,16 +177,16 @@ inline static bool SameWeek(uint32_t olddate, uint32_t newdate)
 //同一月
 inline static bool SameMonth(uint32_t olddate, uint32_t newdate)
 {
-	uint32_t oldmonths = DaysOfDateMonth(GetYear(olddate), GetMonth(olddate));
-	uint32_t newmonths = DaysOfDateMonth(GetYear(newdate), GetMonth(newdate));
+	uint32_t oldmonths = DaysOfMonth(GetYear(olddate), GetMonth(olddate));
+	uint32_t newmonths = DaysOfMonth(GetYear(newdate), GetMonth(newdate));
 	return (oldmonths / 7) == (newmonths / 7);
 }
 
 //同一季
 inline static bool SameQuarter(uint32_t olddate, uint32_t newdate)
 {
-	uint32_t oldmonths = DaysOfDateMonth(GetYear(olddate), GetMonth(olddate));
-	uint32_t newmonths = DaysOfDateMonth(GetYear(newdate), GetMonth(newdate));
+	uint32_t oldmonths = DaysOfMonth(GetYear(olddate), GetMonth(olddate));
+	uint32_t newmonths = DaysOfMonth(GetYear(newdate), GetMonth(newdate));
 	return (oldmonths / 3) == (newmonths / 3);
 }
 
@@ -204,62 +203,62 @@ inline static bool SameQuarter(uint32_t olddate, uint32_t newdate)
 // 	return mktime(&_tm);
 // }
 
-inline static uint32_t get_current_time(uint32_t* time = nullptr)
+inline static uint32_t NowDateTime(uint32_t* t = nullptr)
 {
-	time_t _t = time(NULL);
+	time_t _t = ::time(nullptr);
 	struct tm * timeinfo = localtime(&_t);
 	uint32_t year = timeinfo->tm_year + 1900;
 	uint32_t month = timeinfo->tm_mon + 1;
 	uint32_t day = timeinfo->tm_mday;
-	if (time) {
-		*time = MakeTime(timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
+	if (t) {
+		*t = MakeTime(timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
 	}
 	return year * 10000 + month * 100 + day;
 }
 
-uint32_t PrevSecond(uint32_t hour, uint32_t minute, uint32_t second, uint32_t secs)
+inline static uint32_t PrevSecond(uint32_t hour, uint32_t minute, uint32_t second, uint32_t secs)
 {
 	boost::posix_time::time_duration t(hour, minute, second, 0);
 	t -= boost::posix_time::seconds(secs);
 	return MakeDate(t.hours(), t.minutes(), t.seconds());
 }
 
-uint32_t NextSecond(uint32_t hour, uint32_t minute, uint32_t second, uint32_t secs)
+inline static uint32_t NextSecond(uint32_t hour, uint32_t minute, uint32_t second, uint32_t secs)
 {
 	boost::posix_time::time_duration t(hour, minute, second, 0);
 	t += boost::posix_time::seconds(secs);
 	return MakeDate(t.hours(), t.minutes(), t.seconds());
 }
 
-uint32_t PrevMinute(uint32_t hour, uint32_t minute, uint32_t mins)
+inline static uint32_t PrevMinute(uint32_t hour, uint32_t minute, uint32_t mins)
 {
 	boost::posix_time::time_duration t(hour, minute, 0, 0);
 	t += boost::posix_time::minutes(mins);
 	return MakeDate(t.hours(), t.minutes(), t.seconds());
 }
 
-uint32_t NextMinute(uint32_t hour, uint32_t minute, uint32_t mins)
+inline static uint32_t NextMinute(uint32_t hour, uint32_t minute, uint32_t mins)
 {
 	boost::posix_time::time_duration t(hour, minute, 0, 0);
 	t += boost::posix_time::minutes(mins);
 	return MakeDate(t.hours(), t.minutes(), t.seconds());
 }
 
-uint32_t PrevDay(uint32_t year, uint32_t month, uint32_t day, uint32_t days)
+inline static uint32_t PrevDay(uint32_t year, uint32_t month, uint32_t day, uint32_t days)
 {
 	boost::gregorian::date d(year, month, day);
 	d -= boost::gregorian::days(days);
 	return MakeDate(d.year(), d.month(), d.day());
 }
 
-uint32_t NextDay(uint32_t year, uint32_t month, uint32_t day, uint32_t days)
+inline static uint32_t NextDay(uint32_t year, uint32_t month, uint32_t day, uint32_t days)
 {
 	boost::gregorian::date d(year, month, day);
 	d += boost::gregorian::days(days);
 	return MakeDate(d.year(), d.month(), d.day());
 }
 
-uint32_t PrevWorkDay(uint32_t year, uint32_t month, uint32_t day, uint32_t days)
+inline static uint32_t PrevWorkDay(uint32_t year, uint32_t month, uint32_t day, uint32_t days)
 {
 	boost::gregorian::date d(year, month, day);
 	while (days>0)
@@ -284,7 +283,7 @@ uint32_t PrevWorkDay(uint32_t year, uint32_t month, uint32_t day, uint32_t days)
 	return MakeDate(d.year(), d.month(), d.day());
 }
 
-uint32_t NextWorkDay(uint32_t year, uint32_t month, uint32_t day, uint32_t days)
+inline static uint32_t NextWorkDay(uint32_t year, uint32_t month, uint32_t day, uint32_t days)
 {
 	boost::gregorian::date d(year, month, day);
 	while (days > 0)
@@ -309,63 +308,63 @@ uint32_t NextWorkDay(uint32_t year, uint32_t month, uint32_t day, uint32_t days)
 	return MakeDate(d.year(), d.month(), d.day());
 }
 
-uint32_t PrevMonth(uint32_t year, uint32_t month, uint32_t days)
+inline static uint32_t PrevMonth(uint32_t year, uint32_t month, uint32_t days)
 {
 	boost::gregorian::date d(year, month, 0);
 	d -= boost::gregorian::months(month);
 	return MakeDate(d.year(), d.month(), d.day());
 }
 
-uint32_t NextMonth(uint32_t year, uint32_t month, uint32_t days)
+inline static uint32_t NextMonth(uint32_t year, uint32_t month, uint32_t days)
 {
 	boost::gregorian::date d(year, month, 0);
 	d += boost::gregorian::months(month);
 	return MakeDate(d.year(), d.month(), d.day());
 }
 
-uint32_t PrevDay(uint32_t date, uint32_t days)
+inline static uint32_t PrevDay(uint32_t date, uint32_t days)
 {
 	uint32_t year, month, day;
 	SplitDate(date, year, month, day);
 	return PrevDay(year, month, day, days);
 }
 
-uint32_t NextDay(uint32_t date, uint32_t days)
+inline static uint32_t NextDay(uint32_t date, uint32_t days)
 {
 	uint32_t year, month, day;
 	SplitDate(date, year, month, day);
 	return NextDay(year, month, day, days);
 }
 
-uint32_t PrevWorkDay(uint32_t date, uint32_t days)
+inline static uint32_t PrevWorkDay(uint32_t date, uint32_t days)
 {
 	uint32_t year, month, day;
 	SplitDate(date, year, month, day);
 	return PrevWorkDay(year, month, day, days);
 }
 
-uint32_t NextWorkDay(uint32_t date, uint32_t days)
+inline static uint32_t NextWorkDay(uint32_t date, uint32_t days)
 {
 	uint32_t year, month, day;
 	SplitDate(date, year, month, day);
 	return NextWorkDay(year, month, day, days);
 }
 
-uint32_t PrevMonth(uint32_t date, uint32_t months)
+inline static uint32_t PrevMonth(uint32_t date, uint32_t months)
 {
 	uint32_t year, month, day;
 	SplitDate(date, year, month, day);
 	return PrevMonth(year, month, months);
 }
 
-uint32_t NextMonth(uint32_t date, uint32_t months)
+inline static uint32_t NextMonth(uint32_t date, uint32_t months)
 {
 	uint32_t year, month, day;
 	SplitDate(date, year, month, day);
 	return NextMonth(year, month, months);
 }
 
-void PrevDateTime(uint32_t& date, uint32_t& time, uint32_t secs)
+inline static void PrevDateTime(uint32_t& date, uint32_t& time, uint32_t secs)
 {
 	uint32_t year, month, day;
 	SplitDate(date, year, month, day);
@@ -379,7 +378,7 @@ void PrevDateTime(uint32_t& date, uint32_t& time, uint32_t secs)
 	time = MakeTime(pt_time.hours(), pt_time.minutes(), pt_time.seconds());
 }
 
-void NextDateTime(uint32_t& date, uint32_t& time, uint32_t secs)
+inline static void NextDateTime(uint32_t& date, uint32_t& time, uint32_t secs)
 {
 	uint32_t year, month, day;
 	SplitDate(date, year, month, day);
@@ -395,6 +394,6 @@ void NextDateTime(uint32_t& date, uint32_t& time, uint32_t secs)
 
 }
 
-#endif//__H_XLOGGER_HPP_
+#endif//__H_XDATETIME_HPP_
 
 
