@@ -69,6 +69,7 @@ public:
 #if defined(SIGQUIT)
     	signals.add(SIGQUIT);
 #endif	
+   		//signals.add(SIGKILL); /* kill (cannot be caught or ignored) */
 		T* pT = static_cast<T*>(this);
     	signals.async_wait(boost::bind(&T::stop, pT));
 
