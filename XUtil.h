@@ -63,6 +63,7 @@
 #include <WindowsX.h>
 #include <tchar.h>
 #include <memory.h>
+typedef intptr_t ssize_t;
 #else //LINUX
 #include <sys/types.h> 
 #include <sys/syscall.h>

@@ -55,6 +55,11 @@ namespace XUtil {
 			boost::log::add_common_attributes();
 		}
 
+		boost::log::sources::severity_logger<boost::log::trivial::severity_level>& logger()
+		{
+			return logger_;
+		}
+
 		void write(boost::log::trivial::severity_level lv, const char *fmt, ...)
 		{
 			char buffer[2048] = {0};
@@ -73,6 +78,11 @@ namespace XUtil {
 	private:
 		boost::log::sources::severity_logger<boost::log::trivial::severity_level> logger_;
 	};
+
+	#define logger_debug BOOST_LOG_SEV(XUtil::XLogger::instance().logger(), boost::log::trivial::debug)
+	#define logger_info BOOST_LOG_SEV(XUtil::XLogger::instance().logger(), boost::log::trivial::info)
+	#define logger_warning BOOST_LOG_SEV(XUtil::XLogger::instance().logger(), boost::log::trivial::warning)
+	#define logger_error BOOST_LOG_SEV(XUtil::XLogger::instance().logger(), boost::log::trivial::error)
 
 	template <typename... Args>
 	inline void LOG4D(const char *fmt, Args... args)
