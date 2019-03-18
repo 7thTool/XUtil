@@ -122,7 +122,7 @@ struct XSharedMemoryRemove
     }
 };
 
-template <bool mapped_file = false>
+template <class managed_t = boost::interprocess::managed_shared_memory>
 class XSharedMemory
 {
   public:
@@ -139,13 +139,14 @@ class XSharedMemory
     //boost::interprocess::upgradable_lock<Mutex>  upgrade_lock(move(scoped_lock));
     //This calls unlock_and_lock_sharable()
     //boost::interprocess::sharable_lock<Mutex>    share_lock(move(scoped_lock));
-#if mapped_file
-    typedef boost::interprocess::managed_mapped_file managed_t;
-    typedef boost::interprocess::managed_mapped_file::segment_manager segment_manager_t;
-#else
-    typedef boost::interprocess::managed_shared_memory managed_t;
-    typedef boost::interprocess::managed_shared_memory::segment_manager segment_manager_t;
-#endif
+// #if mapped_file
+//     typedef boost::interprocess::managed_mapped_file managed_t;
+//     typedef boost::interprocess::managed_mapped_file::segment_manager segment_manager_t;
+// #else
+//     typedef boost::interprocess::managed_shared_memory managed_t;
+//     typedef boost::interprocess::managed_shared_memory::segment_manager segment_manager_t;
+// #endif
+    typedef typename managed_t::segment_manager segment_manager_t;
     typedef boost::interprocess::allocator<void, segment_manager_t> void_allocator;
     typedef boost::interprocess::allocator<char, segment_manager_t> char_allocator;
     typedef boost::interprocess::basic_string<char, std::char_traits<char>, char_allocator> char_string;
