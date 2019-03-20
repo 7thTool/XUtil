@@ -21,6 +21,7 @@ template<class T>
 class XServer : public XApp
 {
 	typedef XApp Base;
+#ifdef __APPLE__
 	class Input : public boost::enable_shared_from_this<Input>
 	{
 	public:
@@ -81,6 +82,7 @@ class XServer : public XApp
 		boost::asio::posix::stream_descriptor _input;
 		char _command;
 	};
+#endif
 public:
 	XServer():io_service_(),signals_(io_service_)
 	{
@@ -133,7 +135,9 @@ public:
    		//signals.add(SIGKILL); /* kill (cannot be caught or ignored) */
 		T* pT = static_cast<T*>(this);
     	signals_.async_wait(boost::bind(&T::on_signals, pT, boost::asio::placeholders::error, boost::asio::placeholders::signal_number));
-    	Input::create(pT, io_service_);
+#ifdef __APPLE__
+		Input::create(pT, io_service_);
+#endif
 		io_service_.run();
 
 		return true;
