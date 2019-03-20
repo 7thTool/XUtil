@@ -47,27 +47,34 @@ inline static uint32_t GetMonth(uint32_t date) { return date / 100 % 100; }
 inline static uint32_t GetDay(uint32_t date) { return date % 100; }
 
 //时间HHMMSS格式转换成分钟数
-inline static uint32_t MinutesPerDay(uint32_t time)
+inline static uint32_t TimeToMinutes(uint32_t time)
 {
     return GetHour(time) * MAX_MINUTE_PER_HOUR + GetMinute(time);
 }
 
 //分钟数转换成时间HHMMSS格式
-inline static uint32_t MinutesToTimePerDay(uint32_t minutes)
+inline static uint32_t MinutesToTime(uint32_t minutes)
 {
     return minutes / MAX_MINUTE_PER_HOUR * 10000 + minutes % MAX_MINUTE_PER_HOUR * 100;
 }
 
 //日间分钟差，时间HHMMSS格式
-inline static uint32_t DiffTimePerDay(uint32_t start, uint32_t end)
+inline static uint32_t DiffTime(uint32_t start, uint32_t end)
 {
-    return MinutesPerDay(end) - MinutesPerDay(start);
+    return TimeToMinutes(end) - TimeToMinutes(start);
 }
 
 //将HHMMSS格式转换成秒数
-inline static uint32_t SecondsPerDay(uint32_t time)
+inline static uint32_t TimeToSeconds(uint32_t time)
 {
-    return MinutesPerDay(time) * MAX_SECOND_PER_MINUTE + GetSecond(time);
+    return TimeToMinutes(time) * MAX_SECOND_PER_MINUTE + GetSecond(time);
+}
+
+//分钟数转换成时间HHMMSS格式
+inline static uint32_t SecondsToTime(uint32_t seconds)
+{
+	uint32_t minutes = seconds / MAX_SECOND_PER_MINUTE;
+    return minutes / MAX_MINUTE_PER_HOUR * 10000 + minutes % MAX_MINUTE_PER_HOUR * 100 + seconds % MAX_SECOND_PER_MINUTE;
 }
 
 const std::vector<uint32_t> MAX_DAYS_PER_MONTH = { 31,28,31,30,31,30,31,31,30,31,30,31 };
