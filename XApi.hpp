@@ -39,7 +39,7 @@ namespace XUtil
 	};
 }
 
-extern XUtil::XApp* theApp;
+extern XUTIL_API XUtil::XApp* theApp;
 
 #endif//_H_XApI_H_
 
