@@ -8,7 +8,7 @@
 
 namespace XUtil
 {
-	class XApi
+	class XUTIL_API XApi
 	{
 	protected:
 		std::string name_;
@@ -28,7 +28,7 @@ namespace XUtil
 		inline boost::property_tree::ptree& cfg() { return cfg_; }
 	};
 
-	class XApp : public XApi
+	class XUTIL_API XApp : public XApi
 	{
 	public:
 		XApp();

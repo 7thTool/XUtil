@@ -90,6 +90,7 @@ typedef intptr_t ssize_t;
 #include <ctype.h>
 #include <time.h>
 #include <float.h>
+#include <math.h>
 
 
 typedef unsigned char byte;
@@ -134,6 +135,10 @@ static bool IsEqualFloat(double x, double y) {
 
 #ifndef _countof
 #define _countof(array) (sizeof(array)/sizeof(array[0]))
+#endif
+
+#ifndef _countxofy
+#define _countxofy(x,y) ((y+((x)-1))/(x))
 #endif
 
 #define _hasallof(s,f) (((s)&(f))==(f))
@@ -189,7 +194,34 @@ static bool IsEqualFloat(double x, double y) {
 #endif//
 #endif//
 
-int GetDecimalDigits(double v);
+static int GetDecimalDigits(double v)
+{
+	int digits = 0;
+	double decimal = fmod(v, 1.);
+	if (!IsZeroFloat(decimal)) {
+#if 1
+		for (digits = 1;digits < 6;digits++)
+		{
+			double temp = decimal*pow(10., digits);
+			temp = fmod(temp, 1.);
+			if (IsZeroFloat(temp)) {
+				break;
+			}
+		}
+#else
+		char buf[16] = { 0 };
+		sprintf(buf, "%.6lf", decimal);
+		for (digits = 6; digits > 0; digits--)
+		{
+			//x.xxxxxx
+			if (buf[1 + digits] != '0') {
+				break;
+			}
+		}
+#endif//
+	}
+	return digits;
+}
 
 #endif//_H_XUTIL_H_
 

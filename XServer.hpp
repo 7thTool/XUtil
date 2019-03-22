@@ -82,6 +82,77 @@ class XServer : public XApp
 		boost::asio::posix::stream_descriptor _input;
 		char _command;
 	};
+#else
+#define INPUT_BUFFER_LENGTH 512
+class Input {
+
+	public:
+		typedef boost::shared_ptr<Input> Ptr;
+
+	public:
+		static void create(T* pT, boost::asio::io_service& io_service)
+		{
+			Ptr input(
+					new Input( pT, io_service )
+					);
+			input->read();
+		}
+
+    public:
+        Input(T* pT, boost::asio::io_service& io_service)
+            : pT_(pT), input_buffer( INPUT_BUFFER_LENGTH), input_handle( io_service)
+        {
+            
+        }
+
+		void read()
+		{
+			// Read a line of input.
+            boost::asio::async_read_until( input_handle, input_buffer, "\r\n",
+                boost::bind( &Input::handle_read
+				, this->shared_from_this(),
+                    boost::asio::placeholders::error,
+                    boost::asio::placeholders::bytes_transferred));
+		}
+        
+		void handle_read( const boost::system::error_code& error, std::size_t length)
+		{
+			if (!error)
+			{
+				// Remove newline from input.
+				input_buffer.consume(1);
+				input_buffer.commit( length - 1);
+
+				std::istream is(&input_buffer);
+				std::string s;
+				is >> s;
+
+				std::cout << s << std::endl;
+				if(s == "q") {
+					pT_->stop();
+					return;
+				}
+
+				this->read();
+			}
+			else if( error == boost::asio::error::not_found)
+			{
+				std::cout << "Did not receive ending character!" << std::endl;
+			}
+		}
+
+		void handle_write( const boost::system::error_code& error)
+		{
+			if (!error)
+			{
+				this->read();
+			}
+		}
+    private:
+		T* pT_;
+        boost::asio::streambuf input_buffer;
+        boost::asio::windows::stream_handle input_handle;
+};
 #endif
 public:
 	XServer():io_service_(),signals_(io_service_)
