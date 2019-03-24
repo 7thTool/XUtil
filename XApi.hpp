@@ -6,21 +6,25 @@
 #include "XUtil.hpp"
 #include "XXml.hpp"
 
+#define theApp XUtil::XApp::instance()
+
 namespace XUtil
 {
-	class XUTIL_API XApi
+	class XApi
 	{
 	protected:
+		boost::property_tree::ptree cfg_;
 		std::string name_;
 		boost::filesystem::path work_path_;
 		boost::filesystem::path data_path_;
-		boost::property_tree::ptree cfg_;
 	public:
-		XApi();
-		virtual ~XApi();
+		XApi() {}
+		~XApi() {}
 
-		virtual bool init(char* xml, int xmlflag = 0);
-		virtual void term();
+		bool init(char *xml, int xmlflag);
+		void term()
+		{
+		}
 
 		inline const std::string& name() { return name_; }
 		inline const boost::filesystem::path& work_path() { return work_path_; }
@@ -28,18 +32,74 @@ namespace XUtil
 		inline boost::property_tree::ptree& cfg() { return cfg_; }
 	};
 
-	class XUTIL_API XApp : public XApi
+	class XApp : public XApi
 	{
+	protected:
+		static XApp* _inst;
 	public:
-		XApp();
-		~XApp();
+		static XApp& instance() { return *_inst; }
 
-		bool init(char* xml, int xmlflag = 0);
-		void term();
+		XApp() { _inst = this; }
+		~XApp() { }
+
+		bool init(char *xml, int xmlflag)
+		{
+			cfg_from_xml(xml, xmlflag, cfg_);
+			boost::filesystem::path app_path = boost::dll::program_location();
+			name_ = cfg_.get<std::string>("name", "");
+			if (name_.empty())
+			{
+				name_ = app_path.stem().string();
+				cfg_.put("name", name_);
+			}
+			work_path_ = cfg_.get<std::string>("work_path", "");
+			if (work_path_.empty())
+			{
+				work_path_ = app_path.parent_path();
+				cfg_.put("work_path", work_path_);
+			}
+			data_path_ = cfg_.get<std::string>("data_path", "");
+			if (data_path_.empty())
+			{
+				data_path_ = work_path_;
+				data_path_.append("data");
+				if (!boost::filesystem::exists(data_path_))
+				{
+					boost::filesystem::create_directory(data_path_);
+				}
+				cfg_.put("data_path", data_path_);
+			}
+
+			return true;
+		}
+
+		void term()
+		{
+			
+		}
 	};
-}
 
-extern XUTIL_API XUtil::XApp* theApp;
+	XApp* XApp::_inst = nullptr;
+
+		bool XApi::init(char *xml, int xmlflag)
+		{
+			cfg_from_xml(xml, xmlflag, cfg_);
+			boost::filesystem::path app_path = boost::dll::program_location();
+			name_ = cfg_.get<std::string>("name", "");
+			work_path_ = cfg_.get<std::string>("work_path", "");
+			if (work_path_.empty())
+			{
+				work_path_ = theApp.work_path();
+			}
+			data_path_ = cfg_.get<std::string>("data_path", "");
+			if (data_path_.empty())
+			{
+				data_path_ = theApp.data_path();
+			}
+			return true;
+		}
+
+}
 
 #endif//_H_XApI_H_
 
