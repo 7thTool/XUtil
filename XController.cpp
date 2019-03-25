@@ -1,4 +1,5 @@
 #include "XController.hpp"
+#include "XLogger.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -73,9 +74,16 @@ void XControllerImpl::start(char* xml, int xmlflag)
             try
             {
                 boost::filesystem::path path_module = work_path_;
-                std::string name = cfgi.second.get<std::string>("name", "");
+#ifdef _WIN32
+                std::string name = cfgi.second.get<std::string>("name", "") + ".dll";
+#elif __APPLE__
+                std::string name = cfgi.second.get<std::string>("name", "") + ".dylib";
+#else
+                std::string name = "lib" + cfgi.second.get<std::string>("name", "") + ".so";
+#endif
                 std::string data = cfgi.second.get<std::string>("data", "");
                 path_module.append(name);
+                LOG4I("start module: %s", path_module.c_str());
                 std::shared_ptr<boost::dll::shared_library> lib = std::make_shared<boost::dll::shared_library>(path_module);
                 if (lib->is_loaded())
                 {

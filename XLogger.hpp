@@ -1,9 +1,9 @@
+#pragma once
 #ifndef __H_XLOGGER_HPP_
 #define __H_XLOGGER_HPP_
 
-#pragma once
-
 #include "XUtil.hpp"
+#include "XLogger.h"
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/log/utility/setup/file.hpp>
@@ -30,10 +30,9 @@ namespace XUtil {
 	class XLogger : private boost::noncopyable
 	{
 	public:
-		static XLogger &instance()
-		{
-			static XLogger slogger;
-			return slogger;
+		static XLogger& instance() {
+			static XLogger _inst;
+			return _inst;
 		}
 
 		static void init(
@@ -60,76 +59,62 @@ namespace XUtil {
 			return logger_;
 		}
 
-		void write(boost::log::trivial::severity_level lv, const char *fmt, ...)
-		{
-			char buffer[2048] = {0};
-			va_list args;
-			va_start(args, fmt);
-			vsnprintf(buffer, sizeof(buffer) - 1, fmt, args);
-			BOOST_LOG_SEV(logger_, lv) << buffer;
-			va_end(args);
-		}
+		// void logout(boost::log::trivial::severity_level lv, const char *fmt, ...)
+		// {
+		// 	char buffer[2048] = {0};
+		// 	va_list args;
+		// 	va_start(args, fmt);
+		// 	vsnprintf(buffer, sizeof(buffer) - 1, fmt, args);
+		// 	BOOST_LOG_SEV(logger_, lv) << buffer;
+		// 	va_end(args);
+		// }
 
-		void write_direct(boost::log::trivial::severity_level lv, const char *str)
-		{
-			BOOST_LOG_SEV(logger_, lv) << str;
-		}
+		// void logout_direct(boost::log::trivial::severity_level lv, const char *str)
+		// {
+		// 	BOOST_LOG_SEV(logger_, lv) << str;
+		// }
 
 	private:
 		boost::log::sources::severity_logger<boost::log::trivial::severity_level> logger_;
 	};
 
-	#define logger_debug BOOST_LOG_SEV(XUtil::XLogger::instance().logger(), boost::log::trivial::debug)
-	#define logger_info BOOST_LOG_SEV(XUtil::XLogger::instance().logger(), boost::log::trivial::info)
-	#define logger_warning BOOST_LOG_SEV(XUtil::XLogger::instance().logger(), boost::log::trivial::warning)
-	#define logger_error BOOST_LOG_SEV(XUtil::XLogger::instance().logger(), boost::log::trivial::error)
+	// template <typename... Args>
+	// inline void LOG4D(const char *fmt, Args... args)
+	// {
+	// 	XUtil::XLogger::instance().logout(boost::log::trivial::debug, fmt, args...);
+	// }
 
-	template <typename... Args>
-	inline void LOG4D(const char *fmt, Args... args)
-	{
-		XUtil::XLogger::instance().write(boost::log::trivial::debug, fmt, args...);
-	}
+	// template <typename... Args>
+	// inline void LOG4I(const char *fmt, Args... args)
+	// {
+	// 	XUtil::XLogger::instance().logout(boost::log::trivial::info, fmt, args...);
+	// }
 
-	template <typename... Args>
-	inline void LOG4I(const char *fmt, Args... args)
-	{
-		XUtil::XLogger::instance().write(boost::log::trivial::info, fmt, args...);
-	}
+	// template <typename... Args>
+	// inline void LOG4W(const char *fmt, Args... args)
+	// {
+	// 	XUtil::XLogger::instance().logout(boost::log::trivial::warning, fmt, args...);
+	// }
 
-	template <typename... Args>
-	inline void LOG4W(const char *fmt, Args... args)
-	{
-		XUtil::XLogger::instance().write(boost::log::trivial::warning, fmt, args...);
-	}
-
-	template <typename... Args>
-	inline void LOG4E(const char *fmt, Args... args)
-	{
-		XUtil::XLogger::instance().write(boost::log::trivial::error, fmt, args...);
-	}
+	// template <typename... Args>
+	// inline void LOG4E(const char *fmt, Args... args)
+	// {
+	// 	XUtil::XLogger::instance().logout(boost::log::trivial::error, fmt, args...);
+	// }
 
 	// template <typename... Args>
 	// inline void LOG4F(const char *fmt, Args... args)
 	// {
-	// 	XUtil::XLogger::instance().write(boost::log::trivial::fatal, fmt, args...);
+	// 	XUtil::XLogger::instance().logout(boost::log::trivial::fatal, fmt, args...);
 	// }
 }
 
-// #ifndef LOG4D
-// #define LOG4D(format, ...) XUtil::XLogger::instance().write(boost::log::trivial::debug, format, ##__VA_ARGS__)
-// #endif//
-// #ifndef LOG4I
-// #define LOG4I(format, ...) XUtil::XLogger::instance().write(boost::log::trivial::info, format, ##__VA_ARGS__)
-// #endif//LOG4I
-// #ifndef LOG4W
-// #define LOG4W(format, ...) XUtil::XLogger::instance().write(boost::log::trivial::warning, format, ##__VA_ARGS__)
-// #endif//LOG4W
-// #ifndef LOG4E
-// #define LOG4E(format, ...) XUtil::XLogger::instance().write(boost::log::trivial::error, format, ##__VA_ARGS__)
-// #endif//LOG4E
-// #ifndef LOG4F
-// #define LOG4F(format, ...) XUtil::XLogger::instance().write(boost::log::trivial::fatal, format, ## __VA_ARGS__)
-// #endif//LOG4F
+#define logger_trace BOOST_LOG_SEV(XUtil::XLogger::instance().logger(), boost::log::trivial::trace)
+#define logger_debug BOOST_LOG_SEV(XUtil::XLogger::instance().logger(), boost::log::trivial::debug)
+#define logger_info BOOST_LOG_SEV(XUtil::XLogger::instance().logger(), boost::log::trivial::info)
+#define logger_warning BOOST_LOG_SEV(XUtil::XLogger::instance().logger(), boost::log::trivial::warning)
+#define logger_error BOOST_LOG_SEV(XUtil::XLogger::instance().logger(), boost::log::trivial::error)
+#define logger_fatal BOOST_LOG_SEV(XUtil::XLogger::instance().logger(), boost::log::trivial::fatal)
 
 #endif//__H_XLOGGER_HPP_
 

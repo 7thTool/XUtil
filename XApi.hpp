@@ -56,7 +56,7 @@ namespace XUtil
 			if (work_path_.empty())
 			{
 				work_path_ = app_path.parent_path();
-				cfg_.put("work_path", work_path_);
+				cfg_.put("work_path", work_path_.string());
 			}
 			data_path_ = cfg_.get<std::string>("data_path", "");
 			if (data_path_.empty())
@@ -67,7 +67,7 @@ namespace XUtil
 				{
 					boost::filesystem::create_directory(data_path_);
 				}
-				cfg_.put("data_path", data_path_);
+				cfg_.put("data_path", data_path_.string());
 			}
 
 			return true;
