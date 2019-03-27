@@ -83,7 +83,7 @@ void XControllerImpl::start(char* xml, int xmlflag)
 #endif
                 std::string data = cfgi.second.get<std::string>("data", "");
                 path_module.append(name);
-                LOG4I("start module: %s", path_module.c_str());
+                LOG4I("start module: %s", path_module.string().c_str());
                 std::shared_ptr<boost::dll::shared_library> lib = std::make_shared<boost::dll::shared_library>(path_module);
                 if (lib->is_loaded())
                 {
@@ -137,7 +137,7 @@ const char* XControllerImpl::data_path()
 void XControllerImpl::SetHandler(const char *name, void *handler)
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
-    if (handler)  {
+    if (!handler)  {
         map_handlers_.erase(name);
     } else {
         map_handlers_[name] = handler;
@@ -161,7 +161,7 @@ void XControllerImpl::SetThreadHandler(const char *name, void *handler)
     //     _p_map_handlers.reset(&map_thread_handlers_[std::this_thread::get_id()]);
     // }
     // auto & _map_handlers = *_p_map_handlers.get();
-    if (handler) {
+    if (!handler) {
         _map_handlers.erase(name);
     } else {
         _map_handlers[name] = handler;
@@ -184,7 +184,7 @@ void *XControllerImpl::GetThreadHandler(const char *name)
 void XControllerImpl::SetData(const char *name, void *data)
 {
     std::unique_lock<std::recursive_mutex> lock(mutex_);
-    if (data) {
+    if (!data) {
         map_datas_.erase(name);
     } else {
         map_datas_[name] = data;
@@ -208,7 +208,7 @@ void XControllerImpl::SetThreadData(const char *name, void *data)
     //     _p_map_datas.reset(&map_thread_datas_[std::this_thread::get_id()]);
     // }
     // auto & _map_datas = *_p_map_datas.get();
-    if (data) {
+    if (!data) {
         _map_datas.erase(name);
     } else {
         _map_datas[name] = data;

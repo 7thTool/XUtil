@@ -216,28 +216,44 @@ namespace XUtil {
 		return codepage;
 	}
 
+	inline std::string utf82mb(const std::string& str, const std::string& charset) 
+	{
+		return boost::locale::conv::from_utf(str, charset.empty() ? get_system_charset() : charset);
+	}
+
+	inline std::string mb2utf8(const std::string& str, const std::string& charset) 
+	{
+		return boost::locale::conv::to_utf<char>(str, charset.empty() ? get_system_charset() : charset);
+	}
+
+	inline std::string utf82mb(const std::string& str)
+	{
+		return boost::locale::conv::from_utf(str, get_system_charset());
+	}
+
+	inline std::string mb2utf8(const std::string& str)
+	{
+		return boost::locale::conv::to_utf<char>(str, get_system_charset());
+	}
+	
 	inline std::string wc2mb(const std::wstring& str, std::string const & charset)
 	{
-		return boost::locale::conv::from_utf(str
-			, charset.empty() ? get_system_charset() : charset);
+		return boost::locale::conv::from_utf(str, charset.empty() ? get_system_charset() : charset);
 	}
 
 	inline std::wstring mb2wc(const std::string& str, std::string const & charset)
 	{
-		return boost::locale::conv::to_utf<wchar_t>(str 
-			, charset.empty() ? get_system_charset() : charset);
+		return boost::locale::conv::to_utf<wchar_t>(str , charset.empty() ? get_system_charset() : charset);
 	}
 
 	inline std::string wc2mb(const std::wstring& str)
 	{
-		return boost::locale::conv::from_utf(str
-			, get_system_charset());
+		return boost::locale::conv::from_utf(str, get_system_charset());
 	}
 
 	inline std::wstring mb2wc(const std::string& str)
 	{
-		return boost::locale::conv::to_utf<wchar_t>(str
-			, get_system_charset());
+		return boost::locale::conv::to_utf<wchar_t>(str, get_system_charset());
 	}
 
 	inline const std::string& buf2hex(const std::string &src, std::string& dst)
