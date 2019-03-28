@@ -89,8 +89,8 @@ void XControllerImpl::start(char* xml, int xmlflag)
                 {
                     modules_.emplace_back(lib);
                     if (lib->has("Start")) {
-                        auto& Start = lib->get<void(char*)>("Start");
-                        Start((char*)data.c_str());
+                        auto& Start = lib->get<void(char*, int)>("Start");
+                        Start((char*)data.c_str(), (int)XUtil::XML_FLAG_JSON_STRING);
                     }
                 }
             }
