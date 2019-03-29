@@ -118,28 +118,26 @@ class Input : public boost::enable_shared_from_this<Input>
         
 		void handle_read( const boost::system::error_code& error, std::size_t length)
 		{
-			if (!error)
-			{
-				// Remove newline from input.
-				input_buffer.consume(1);
-				input_buffer.commit( length - 1);
-
-				std::istream is(&input_buffer);
-				std::string s;
-				is >> s;
-
-				std::cout << s << std::endl;
-				if(s == "q") {
-					pT_->stop();
-					return;
-				}
-
-				this->read();
+			if (error) {
+				std::cerr << "read error: " << boost::system::system_error(error).what() << std::endl;
+				return;
 			}
-			else if( error == boost::asio::error::not_found)
-			{
-				std::cout << "Did not receive ending character!" << std::endl;
+
+			// Remove newline from input.
+			input_buffer.consume(1);
+			input_buffer.commit( length - 1);
+
+			std::istream is(&input_buffer);
+			std::string s;
+			is >> s;
+
+			std::cout << s << std::endl;
+			if(s == "q") {
+				pT_->stop();
+				return;
 			}
+
+			this->read();
 		}
 
 		void handle_write( const boost::system::error_code& error)
