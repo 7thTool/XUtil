@@ -38,7 +38,7 @@ namespace XUtil {
 		static void init(
 			const std::string &filename,
 			boost::log::trivial::severity_level lv = boost::log::trivial::debug,
-			int maxsize = 100 * 1000 * 1000)
+			int maxsize = 100 * 1024 * 1024)
 		{
 			boost::log::register_simple_formatter_factory<boost::log::trivial::severity_level, char>("Severity");
 
@@ -54,7 +54,9 @@ namespace XUtil {
 			boost::log::add_common_attributes();
 		}
 
-		boost::log::sources::severity_logger<boost::log::trivial::severity_level>& logger()
+		inline XLoggerLevel level() { return lv_; }
+
+		inline boost::log::sources::severity_logger<boost::log::trivial::severity_level>& logger()
 		{
 			return logger_;
 		}
@@ -75,6 +77,7 @@ namespace XUtil {
 		// }
 
 	private:
+		XLoggerLevel lv_ = XLoggerLevel::Trace;
 		boost::log::sources::severity_logger<boost::log::trivial::severity_level> logger_;
 	};
 

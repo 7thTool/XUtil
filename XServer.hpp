@@ -101,7 +101,7 @@ class Input : public boost::enable_shared_from_this<Input>
 
     public:
         Input(T* pT, boost::asio::io_service& io_service)
-            : pT_(pT), input_buffer( INPUT_BUFFER_LENGTH), input_handle( io_service)
+            : pT_(pT), input_buffer( INPUT_BUFFER_LENGTH), input_handle( io_service )
         {
             
         }
@@ -109,11 +109,11 @@ class Input : public boost::enable_shared_from_this<Input>
 		void read()
 		{
 			// Read a line of input.
-            boost::asio::async_read_until( input_handle, input_buffer, "\r\n",
+            /*boost::asio::async_read_until( input_handle, input_buffer, "\r\n",
                 boost::bind( &Input::handle_read
 				, this->shared_from_this(),
                     boost::asio::placeholders::error,
-                    boost::asio::placeholders::bytes_transferred));
+                    boost::asio::placeholders::bytes_transferred));*/
 		}
         
 		void handle_read( const boost::system::error_code& error, std::size_t length)
