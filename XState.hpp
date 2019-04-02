@@ -21,13 +21,19 @@ public:
 	}
 	inline void ResetState() { states_.reset(); }
 	inline void SetState(size_t index, bool set = true) { states_[index] = set; }
-	inline void SetAllState(std::initializer_list<size_t> list, bool set = true) { 
+	inline void SetState(std::initializer_list<size_t> list, bool set = true) { 
 		for (auto it = list.begin(); it != list.end(); ++it) {
             states_[*it] = set; 
         }
 	}
 	inline bool IsStateful(size_t index) { return states_[index]; }
 	inline bool IsStateless(size_t index) { return states_[index]; }
+	inline bool IsAllStatefull() {
+		return states_.all();
+	}
+	inline bool IsAnyStateful() {
+		return states_.any();
+	}
 	inline bool IsAllStatefull(std::initializer_list<size_t> list) {
         for (auto it = list.begin(); it != list.end(); ++it) {
             if(!states_[*it]) {
@@ -65,7 +71,7 @@ public:
 			instates_[index] = false;
 		}
 	}
-	inline void SetAllState(std::initializer_list<size_t> list, bool set = true) { 
+	inline void SetState(std::initializer_list<size_t> list, bool set = true) { 
 		for (auto it = list.begin(); it != list.end(); ++it) {
 			states_[*it] = set; 
 			if(set) { 
@@ -81,7 +87,7 @@ public:
 			states_[index] = false;
 		}
 	}
-	inline void SetAllInState(std::initializer_list<size_t> list, bool set = true) { 
+	inline void SetInState(std::initializer_list<size_t> list, bool set = true) { 
 		for (auto it = list.begin(); it != list.end(); ++it) {
             instates_[*it] = set; 
 			if(set) {
@@ -91,6 +97,12 @@ public:
 	}
 	inline bool IsInStateful(size_t index) { return instates_[index]; }
 	inline bool IsInStateless(size_t index) { return instates_[index]; }
+	inline bool IsAllInStatefull() {
+		return instates_.all();
+	}
+	inline bool IsAnyInStateful() {
+		return instates_.any();
+	}
 	inline bool IsAllInStatefull(std::initializer_list<size_t> list) {
         for (auto it = list.begin(); it != list.end(); ++it) {
             if(!instates_[*it]) {
