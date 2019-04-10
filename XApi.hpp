@@ -21,7 +21,15 @@ namespace XUtil
 		XApi() {}
 		~XApi() {}
 
-		bool init(char *xml, int xmlflag);
+		bool init(char *xml, int xmlflag)
+		{
+			cfg_from_xml(xml, xmlflag, cfg_);
+			//boost::filesystem::path app_path = boost::dll::program_location();
+			name_ = cfg_.get<std::string>("name", "");
+			work_path_ = cfg_.get<std::string>("work_path", "");
+			data_path_ = cfg_.get<std::string>("data_path", "");
+			return true;
+		}
 		void term()
 		{
 		}
@@ -32,8 +40,15 @@ namespace XUtil
 		inline boost::property_tree::ptree& cfg() { return cfg_; }
 	};
 
-	class XApp : public XApi
+	class XApiEx : public XApi
 	{
+	public:
+		bool init(char *xml, int xmlflag);
+	};
+
+	class XApp : public XApiEx
+	{
+		typedef XApiEx Base;
 	protected:
 		static XApp* _inst;
 	public:
@@ -44,21 +59,18 @@ namespace XUtil
 
 		bool init(char *xml, int xmlflag)
 		{
-			cfg_from_xml(xml, xmlflag, cfg_);
+			Base::init(xml, xmlflag);
 			boost::filesystem::path app_path = boost::dll::program_location();
-			name_ = cfg_.get<std::string>("name", "");
 			if (name_.empty())
 			{
 				name_ = app_path.stem().string();
 				cfg_.put("name", name_);
 			}
-			work_path_ = cfg_.get<std::string>("work_path", "");
 			if (work_path_.empty())
 			{
 				work_path_ = app_path.parent_path();
 				cfg_.put("work_path", work_path_.string());
 			}
-			data_path_ = cfg_.get<std::string>("data_path", "");
 			if (data_path_.empty())
 			{
 				data_path_ = work_path_;
@@ -69,7 +81,6 @@ namespace XUtil
 				}
 				cfg_.put("data_path", data_path_.string());
 			}
-
 			return true;
 		}
 
@@ -81,17 +92,13 @@ namespace XUtil
 
 	XApp* XApp::_inst = nullptr;
 
-		bool XApi::init(char *xml, int xmlflag)
+		bool XApiEx::init(char *xml, int xmlflag)
 		{
-			cfg_from_xml(xml, xmlflag, cfg_);
-			boost::filesystem::path app_path = boost::dll::program_location();
-			name_ = cfg_.get<std::string>("name", "");
-			work_path_ = cfg_.get<std::string>("work_path", "");
+			XApi::init(xml, xmlflag);
 			if (work_path_.empty())
 			{
 				work_path_ = theApp.work_path();
 			}
-			data_path_ = cfg_.get<std::string>("data_path", "");
 			if (data_path_.empty())
 			{
 				data_path_ = theApp.data_path();
