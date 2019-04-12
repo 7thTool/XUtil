@@ -89,7 +89,7 @@ public:
         std::shared_ptr<std::promise<std::shared_ptr<Response>>> promise = std::make_shared<std::promise<std::shared_ptr<Response>>>();
         std::shared_ptr<Request> request = std::make_shared<Request>(peer, method, params, requestID, promise);
         _openRequests[requestID] = request;
-        pT->_sendRequest(method, params, requestID);
+        pT->_sendRequest(peer, method, params, requestID);
         
         /*const promise = new Promise((resolve, reject) => {
             _openRequests[requestID] = {resolve, reject};
