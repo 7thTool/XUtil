@@ -205,7 +205,9 @@ public:
    		//signals.add(SIGKILL); /* kill (cannot be caught or ignored) */
 		T* pT = static_cast<T*>(this);
     	signals_.async_wait(boost::bind(&T::on_signals, pT, boost::asio::placeholders::error, boost::asio::placeholders::signal_number));
+#ifdef __APPLE__
 		Input::create(pT, io_service_);
+#endif
 		io_service_.run();
 
 		return true;
