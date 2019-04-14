@@ -1555,19 +1555,19 @@ bool wcsregex(wchar_t*src, wchar_t *dst)
 
 #endif//
 
-int mb2wc(const char* src, int srclen, wchar_t* dst, int dstLen, unsigned int cp)
+int mb2wc(const char* src, int srclen, wchar_t* dst, int dstlen, unsigned int cp)
 {
 #ifdef WIN32
-	return ::MultiByteToWideChar(cp, 0, src, srclen, dst, dstLen);
+	return ::MultiByteToWideChar(cp, 0, src, srclen, dst, dstlen);
 #else
 	mbstowcs(dst, src, srclen);
-	return dstLen;
+	return dstlen;
 #endif//
 }
-int wc2mb(const wchar_t* src, int srclen, char* dst, int dstLen, unsigned int cp)
+int wc2mb(const wchar_t* src, int srclen, char* dst, int dstlen, unsigned int cp)
 {
 #ifdef WIN32
-	return ::WideCharToMultiByte(cp, 0, src, srclen, dst, dstLen, NULL, NULL);
+	return ::WideCharToMultiByte(cp, 0, src, srclen, dst, dstlen, NULL, NULL);
 #else
 	//switch (cp)
 	//{
@@ -1587,7 +1587,7 @@ int wc2mb(const wchar_t* src, int srclen, char* dst, int dstLen, unsigned int cp
 	wcstombs(dst, src, srclen);
 	//setlocale(LC_ALL, "C");     //C
 	//setlocale(LC_ALL, "");     //设置本地默认Locale
-	return dstLen;
+	return dstlen;
 #endif//
 }
 
