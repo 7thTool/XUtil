@@ -78,6 +78,7 @@ typedef intptr_t ssize_t;
 #else
 #include <endian.h>
 #endif
+#include <iconv.h>
 #endif
 
 #include <stdint.h>

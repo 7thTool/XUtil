@@ -198,6 +198,20 @@ namespace XUtil {
 		return ss.str();
 	}
 
+	//"UTF-8"
+	//"GBK"
+	//"BIG5"
+
+	#ifdef WIN32
+	inline std::string get_charset_by_codepage(int cp)
+	{
+		CPINFOEX cpinfo = {0};
+		GetCPInfoEx(cp, 0, &cpinfo);
+		cpinfo.CodePageName;
+		return "CP" + boost::lexical_cast<std::string>(cpinfo.CodePage);
+	}
+	#endif//
+
 	inline std::string get_system_charset()
 	{
 		static std::string codepage;
@@ -205,15 +219,17 @@ namespace XUtil {
 			return codepage;
 		}
 	#ifdef WIN32 
-		CPINFOEX  cpinfo;
-		GetCPInfoEx(CP_OEMCP, 0, &cpinfo);
-		cpinfo.CodePageName;
-		codepage = "CP" + boost::lexical_cast<std::string>(cpinfo.CodePage);
+		codepage = get_charset_by_codepage(CP_OEMCP);
 	#else  
 		std::locale loc = boost::locale::generator().generate("");
 		codepage = std::use_facet<boost::locale::info>(loc).encoding();
 	#endif  
 		return codepage;
+	}
+
+	inline std::string mb2mb(const std::string & str, const std::string& from_charset, const std::string& to_charset)
+	{
+		return boost::locale::conv::between(str, to_charset, from_charset);
 	}
 
 	inline std::string utf82mb(const std::string& str, const std::string& charset) 
@@ -254,6 +270,87 @@ namespace XUtil {
 	inline std::wstring mb2wc(const std::string& str)
 	{
 		return boost::locale::conv::to_utf<wchar_t>(str, get_system_charset());
+	}
+
+	template<class tfrom, class tto>
+	class str_conv
+	{
+	public:
+		tfrom from_;
+		tto to_;
+	#ifdef WIN32
+		//
+	#else
+		iconv_t cd_;
+	#endif
+
+		str_conv(tfrom from, tto to):from_(from),to_(to)
+		{
+	#ifdef WIN32
+		//
+	#else
+			cd_ = iconv_open(to_, from_);
+			//if (cd == 0)
+			//	return -1;
+	#endif
+		}
+		~str_conv()
+		{
+	#ifdef WIN32
+		//
+	#else
+			iconv_close(cd_);
+	#endif//
+		}
+
+		int to(const char* src, int srclen, char* dst, int dstlen)
+		{
+		#ifdef WIN32
+			wchar_t* wdst = 0;
+			int wdstlen = 0;
+			wchar_t wbuf[1024] = {0};
+			if(srclen < 1024) {
+				wdst = wbuf;
+				wdstlen = 1024;
+			} else {
+				wdst = (wchar_t*)malloc(srclen*sizeof(wchar_t));
+				wdstlen = srclen;
+			}
+			wdstlen = ::MultiByteToWideChar(from_, 0, src, srclen, wdst, wdstlen);
+			dstlen = ::WideCharToMultiByte(to_, 0, wdst, wdstlen, dst, dstlen, NULL, NULL);
+			if(srclen < 1024) {
+				//
+			} else {
+				free(wdst);
+			}
+			return dstlen;
+		#else
+			size_t srcleft = srclen;
+			size_t dstleft = dstlen;
+			iconv(cd, &src, &srcleft, &dst, &dstleft);
+			return srclen-srcleft;
+		#endif
+		}
+	};
+
+	inline int gbk2utf8(const char* src, int srclen, char* dst, int dstlen)
+	{
+	#ifdef WIN32
+		static str_conv<UINT,UINT> conv_(CP_GBK,CP_UTF8);
+	#else
+		static str_conv<const char*,const char*> conv_("gbk","utf8");
+	#endif
+		return conv_.to(src, srclen, dst, dstlen);
+	}
+
+	inline int utf82gbk(const char* src, int srclen, char* dst, int dstlen)
+	{
+	#ifdef WIN32
+		static str_conv<UINT,UINT> conv_(CP_UTF8,CP_GBK);
+	#else
+		static str_conv<const char*,const char*> conv_("utf8","gbk");
+	#endif
+		return conv_.to(src, srclen, dst, dstlen);
 	}
 
 	inline const std::string& buf2hex(const std::string &src, std::string& dst)

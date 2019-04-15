@@ -1128,50 +1128,16 @@ XBOOST_API bool wcsregex(wchar_t*src, wchar_t *dst);
 #define CP_UTF8 
 #endif
 #ifndef CP_GBK
-#define CP_GBK  2312
+#define CP_GBK  936 //繁体中文（大五码）兼容GB2312
+#endif
+#ifndef CP_BIG5
+#define CP_BIG5  950 //繁体中文（大五码）
 #endif
 #endif//
 
 //XBOOST_API int mb2wc(const char* src, int srclen, wchar_t* dst, int dstlen, unsigned int cp = 0);
 //XBOOST_API int wc2mb(const wchar_t* src, int srclen, char* dst, int dstlen, unsigned int cp = 0);
 
-static int gbk2utf8(const char* src, int srclen, char* dst, int dstlen)
-{
-#ifdef WIN32
-	wchar_t* wdst = 0;
-	int wdstlen = 0;
-	wchar_t wbuf[1024] = {0};
-	if(srclen < 1024) {
-		wdst = wbuf;
-		wdstlen = 1024;
-	} else {
-		wdst = (wchar_t*)malloc(srclen*sizeof(wchar_t));
-		wdstlen = srclen;
-	}
-	::MultiByteToWideChar(CP_GBK, 0, src, srclen, wdst, wdstlen);
-	return ::WideCharToMultiByte(CP_UTF8, 0, wdst, wdstlen, dst, dstlen, NULL, NULL);
-#else
-#endif
-}
-
-static int utf82gbk(const char* src, int srclen, char* dst, int dstlen)
-{
-#ifdef WIN32
-	wchar_t* wdst = 0;
-	int wdstlen = 0;
-	wchar_t wbuf[1024] = {0};
-	if(srclen < 1024) {
-		wdst = wbuf;
-		wdstlen = 1024;
-	} else {
-		wdst = (wchar_t*)malloc(srclen*sizeof(wchar_t));
-		wdstlen = srclen;
-	}
-	::MultiByteToWideChar(CP_UTF8, 0, src, srclen, wdst, wdstlen);
-	return ::WideCharToMultiByte(CP_GBK, 0, wdst, wdstlen, dst, dstlen, NULL, NULL);
-#else
-#endif
-}
 /*
 XBOOST_API void byte2hex(byte by, char* hex);
 XBOOST_API void buf2hex(const byte* buf, int srclen, char* dst, int dstlen);
