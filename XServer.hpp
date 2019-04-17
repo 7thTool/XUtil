@@ -1,6 +1,7 @@
 #pragma once
 
 #include "XApp.hpp"
+#include "XService.hpp"
 #include "XLogger.hpp"
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
@@ -16,6 +17,33 @@
 #include <boost/property_tree/xml_parser.hpp>
 
 namespace XUtil {
+
+template<class T>
+class XModuleServer : public XApp, public XService
+{
+	typedef XApp Base;
+	typedef XService Service;
+  public:
+	XModuleServer() : Base(), Service()
+	{
+	}
+
+	~XModuleServer()
+	{
+	}
+
+	bool start(char* xml, int xmlflag)
+	{
+		Base::init(xml, xmlflag);
+		return Service::start();
+	}
+
+	void stop()
+	{
+		Service::stop();
+		Base::term();
+	}
+};
 
 template<class T>
 class XServer : public XApp
