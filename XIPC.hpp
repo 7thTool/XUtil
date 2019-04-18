@@ -44,6 +44,19 @@
 
 namespace XUtil
 {
+    //Remove message queue on construction and destruction
+    struct XMessageQueueRemove
+    {
+        XMessageQueueRemove(const char *name)
+        {
+            boost::interprocess::message_queue::remove(name);
+        }
+        ~XMessageQueueRemove()
+        {
+            //boost::interprocess::message_queue::remove(name);
+        }
+    };
+
 inline int mq_create(const char *name, int max_que_num, int max_msg_size)
 {
     try

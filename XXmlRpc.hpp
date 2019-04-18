@@ -107,7 +107,7 @@ public:
      */
     inline void sendRemoteNotification (size_t peer, const std::string& method, const std::shared_ptr<boost::property_tree::ptree>& params) {
         T* pT = static_cast<T*>(this);
-        pT->_sendRequest(peer, method, params, (size_t)-1);
+        pT->_sendRequest(peer, method, params, INVALID_REQUEST_ID);
     }
 
     inline void sendRemoteNotification (size_t peer, const std::string& msg) {
@@ -185,8 +185,14 @@ protected:
                 }
             }
         }
-		id = json.get<size_t>("id", (size_t)-1);
+		id = json.get<size_t>("id", INVALID_REQUEST_ID);
 		return ret;
+	}
+	inline void build_request(std::string& str, const std::string& method, const std::string& params, size_t id = INVALID_REQUEST_ID)
+	{
+        std::stringstream ss;
+        ss << R"({"jsonrpc": "2.0", "method":")" << method << R"(","params":)" << params << R"(,"id":)" << id << R"(})";
+        str = ss.str();
 	}
 	inline void build_request(boost::property_tree::ptree& json, const std::string& method, const boost::property_tree::ptree& params, size_t id)
 	{
@@ -318,7 +324,7 @@ protected:
         T* pT = static_cast<T*>(this);
         std::shared_ptr<boost::property_tree::ptree> result;
         bool ret = didReceiveCall(peer, method, params, result);
-        if (id != (size_t)-1) {
+        if (id != INVALID_REQUEST_ID) {
             pT->_sendResponse(peer, id, result, !ret);
         }
         /*const {method, params, id} = json;
