@@ -45,7 +45,10 @@ class XService
 	void stop()
 	{
 		service_.stop();
-		thread_->join();
+		if (thread_) {
+			thread_->join();
+			thread_.reset();
+		}
 		service_.reset();
 	}
 
