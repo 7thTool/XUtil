@@ -83,12 +83,14 @@ public:
     std::future<std::shared_ptr<Response>>
     inline sendRemoteRequest (size_t peer, const std::string& method, const std::shared_ptr<boost::property_tree::ptree>& params) {
         T* pT = static_cast<T*>(this);
-        std::unique_lock<std::mutex> lock(mutex_);
-        const size_t requestID = _requestID++;
+        const size_t requestID = ++_requestID;
 
         std::shared_ptr<std::promise<std::shared_ptr<Response>>> promise = std::make_shared<std::promise<std::shared_ptr<Response>>>();
         std::shared_ptr<Request> request = std::make_shared<Request>(peer, method, params, requestID, promise);
+        
+        std::unique_lock<std::mutex> lock(mutex_);
         _openRequests[requestID] = request;
+        lock.unlock();
         pT->_sendRequest(peer, method, params, requestID);
         
         /*const promise = new Promise((resolve, reject) => {
@@ -300,6 +302,8 @@ protected:
         auto it = _openRequests.find(id);
         if(it != _openRequests.end()) {
             const std::shared_ptr<Request> openRequest = it->second;
+            _openRequests.erase(it);
+            lock.unlock();
             if(openRequest) {
                 if(error) {
                     openRequest->response->set_value(std::make_shared<Response>(peer,true,error,id));
