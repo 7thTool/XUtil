@@ -57,6 +57,41 @@ namespace XUtil
         }
     };
 
+    class MessageQueue : public boost::interprocess::message_queue
+    {
+        typedef boost::interprocess::message_queue Base;
+    protected:
+        std::string name_;
+    public:
+        //!Creates a process shared message queue with name "name". For this message queue,
+        //!the maximum number of messages will be "max_num_msg" and the maximum message size
+        //!will be "max_msg_size". Throws on error and if the queue was previously created.
+        MessageQueue(boost::interprocess::create_only_t create_only,
+                        const char *name,
+                        size_t max_num_msg,
+                        size_t max_msg_size,
+                        const boost::interprocess::permissions &perm = boost::interprocess::permissions()):Base(create_only,name,max_num_msg,max_msg_size),name_(name){}
+
+        //!Opens or creates a process shared message queue with name "name".
+        //!If the queue is created, the maximum number of messages will be "max_num_msg"
+        //!and the maximum message size will be "max_msg_size". If queue was previously
+        //!created the queue will be opened and "max_num_msg" and "max_msg_size" parameters
+        //!are ignored. Throws on error.
+        MessageQueue(boost::interprocess::open_or_create_t open_or_create,
+                        const char *name,
+                        size_t max_num_msg,
+                        size_t max_msg_size,
+                        const boost::interprocess::permissions &perm = boost::interprocess::permissions()):Base(open_or_create,name,max_num_msg,max_msg_size),name_(name){}
+
+        //!Opens a previously created process shared message queue with name "name".
+        //!If the queue was not previously created or there are no free resources,
+        //!throws an error.
+        MessageQueue(boost::interprocess::open_only_t open_only,
+                        const char *name):Base(open_only,name),name_(name){}
+
+        inline const std::string& get_msg_name() { return name_; }
+    };
+
 inline int mq_create(const char *name, int max_que_num, int max_msg_size)
 {
     try
