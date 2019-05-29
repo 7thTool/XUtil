@@ -81,7 +81,12 @@ void XControllerImpl::start(char* xml, int xmlflag)
 #else
                 std::string name = "lib" + cfgi.second.get<std::string>("name", "") + ".so";
 #endif
-                std::string data = cfgi.second.get<std::string>("data", "");
+				std::string data;// = cfgi.second.get<std::string>("data", "");
+				auto opt_data = cfgi.second.get_child_optional("data");
+				if (opt_data) {
+					const boost::property_tree::ptree &cfg_data = opt_data.get();
+					XUtil::json_to_str(data, cfg_data);
+				}
                 path_module.append(name);
                 LOG4I("start module: %s", path_module.string().c_str());
                 std::shared_ptr<boost::dll::shared_library> lib = std::make_shared<boost::dll::shared_library>(path_module);

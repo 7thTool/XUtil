@@ -24,6 +24,7 @@ XApp::XApp() { _inst = this; }
 		bool XApp::init(char *xml, int xmlflag)
 		{
 			Base::init(xml, xmlflag);
+			boost::filesystem::path cur_path = boost::filesystem::current_path();
 			boost::filesystem::path app_path = boost::dll::program_location();
 			if (name_.empty())
 			{
@@ -32,7 +33,7 @@ XApp::XApp() { _inst = this; }
 			}
 			if (work_path_.empty())
 			{
-				work_path_ = app_path.parent_path();
+				work_path_ = cur_path;// app_path.parent_path();
 				cfg_.put("work_path", work_path_.string());
 			}
 			if (data_path_.empty())
