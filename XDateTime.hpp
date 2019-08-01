@@ -20,13 +20,13 @@ inline static uint32_t MakeDate(uint32_t y, uint32_t m, uint32_t d) { return y *
 //构造时间
 inline static uint32_t MakeTime(uint32_t h, uint32_t m, uint32_t s) { return h * 10000 + m * 100 + s; }
 //解构日期
-inline static uint32_t SplitDate(uint32_t date, uint32_t& y, uint32_t& m, uint32_t& d) {
+inline static void SplitDate(uint32_t date, uint32_t& y, uint32_t& m, uint32_t& d) {
 	y = date / 10000;
 	m = date / 100 % 100;
 	d = date % 100;
 }
 //解构时间
-inline static uint32_t SplitTime(uint32_t time, uint32_t& h, uint32_t& m, uint32_t& s) {
+inline static void SplitTime(uint32_t time, uint32_t& h, uint32_t& m, uint32_t& s) {
 	h = time / 10000;
 	m = time / 100 % 100;
 	s = time % 100;
@@ -59,7 +59,7 @@ inline static uint32_t MinutesToTime(uint32_t minutes)
 }
 
 //日间分钟差，时间HHMMSS格式
-inline static uint32_t DiffTime(uint32_t start, uint32_t end)
+inline static uint32_t DiffTimeMinutes(uint32_t start, uint32_t end)
 {
     return TimeToMinutes(end) - TimeToMinutes(start);
 }
