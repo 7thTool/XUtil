@@ -70,11 +70,17 @@ inline static uint32_t TimeToSeconds(uint32_t time)
     return TimeToMinutes(time) * MAX_SECOND_PER_MINUTE + GetSecond(time);
 }
 
-//分钟数转换成时间HHMMSS格式
+//秒数转换成时间HHMMSS格式
 inline static uint32_t SecondsToTime(uint32_t seconds)
 {
 	uint32_t minutes = seconds / MAX_SECOND_PER_MINUTE;
     return minutes / MAX_MINUTE_PER_HOUR * 10000 + minutes % MAX_MINUTE_PER_HOUR * 100 + seconds % MAX_SECOND_PER_MINUTE;
+}
+
+//日间秒差，时间HHMMSS格式
+inline static uint32_t DiffTimeSeconds(uint32_t start, uint32_t end)
+{
+	return TimeToSeconds(end) - TimeToSeconds(start);
 }
 
 const std::vector<uint32_t> MAX_DAYS_PER_MONTH = { 31,28,31,30,31,30,31,31,30,31,30,31 };
