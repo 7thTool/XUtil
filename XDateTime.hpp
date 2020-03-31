@@ -59,7 +59,7 @@ inline static uint32_t MinutesToTime(uint32_t minutes)
 }
 
 //日间分钟差，时间HHMMSS格式
-inline static uint32_t DiffTimeMinutes(uint32_t start, uint32_t end)
+inline static int32_t DiffTimeMinutes(uint32_t start, uint32_t end)
 {
     return TimeToMinutes(end) - TimeToMinutes(start);
 }
@@ -78,7 +78,7 @@ inline static uint32_t SecondsToTime(uint32_t seconds)
 }
 
 //日间秒差，时间HHMMSS格式
-inline static uint32_t DiffTimeSeconds(uint32_t start, uint32_t end)
+inline static int32_t DiffTimeSeconds(uint32_t start, uint32_t end)
 {
 	return TimeToSeconds(end) - TimeToSeconds(start);
 }
