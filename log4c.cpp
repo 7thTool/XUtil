@@ -17,8 +17,9 @@ class CLOG4CMgr
 protected:
     std::string path_;
     std::string name_;
+    int mode_ = 0;
     FILE* fp_[5] = { 0 };
-    int date_ = 0;
+    int date_[5] = { 0 };
     int level_ = LOG4C_INFO;
     std::mutex mutex_;
     std::string GetFileName(int level, int date) 
@@ -41,7 +42,6 @@ protected:
             ss << "debug_";
             break;
         default:
-            assert(0);
             break;
         }
         ss << date << ".log";
@@ -71,11 +71,12 @@ public:
         return _mgr;
     }
 
-    int Init(const char *path, const char *name)
+    int Init(const char *path, const char *name, int mode)
     {
         std::lock_guard<std::mutex> lock(mutex_);
         path_ = path;
         name_ = name;
+        mode_ = mode;
         return 0;
     }
 
@@ -99,7 +100,7 @@ public:
         mutex_.unlock();
     }
 
-    void SetLevel(LOG4C_LEVEL level)
+    void SetLevel(int level)
     {
         level_ = level;
     }
@@ -111,22 +112,25 @@ public:
 
     FILE* GetFile(int level)
     {
+        if(mode_ != LOG4C_LEVEL_FILE) {
+            level = 0;
+        }
         time_t tt;
         time(&tt);
         tm *tp = localtime(&tt);
         int date = (tp->tm_year + 1900) * 10000 + (tp->tm_mon + 1) * 100 + tp->tm_mday;
-        if(!fp_[level] || date_ != date) {
+        if(date_[level] != date) {
             CloseFile(level);
-            date_ = date;
+            date_[level] = date;
             OpenFile(level, date);
         }
         return fp_[level];
     }
 };
 
-int LOG4C_Init(const char *path, const char *name)
+int LOG4C_Init(const char *path, const char *name, int mode)
 {
-    return CLOG4CMgr::Inst().Init(path, name);
+    return CLOG4CMgr::Inst().Init(path, name, mode);
 }
 
 void LOG4C_Term()
@@ -144,7 +148,7 @@ void LOG4C_UnLock()
     CLOG4CMgr::Inst().UnLock();
 }
 
-void LOG4C_SetLevel(LOG4C_LEVEL level)
+void LOG4C_SetLevel(int level)
 {
     CLOG4CMgr::Inst().SetLevel(level);
 }

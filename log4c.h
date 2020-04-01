@@ -13,6 +13,11 @@
 extern "C" {
 #endif//
 
+enum LOG4C_MODE {
+    LOG4C_SINGLE_FILE = 0, //日志输出到一个文件
+    LOG4C_LEVEL_FILE = 1, //日志分级输出到对应Level文件
+};
+
 enum LOG4C_LEVEL {
     LOG4C_ERROR = 1,
     LOG4C_WARN,
@@ -20,13 +25,14 @@ enum LOG4C_LEVEL {
     LOG4C_DEBUG,
 };
 
-int LOG4C_Init(const char *path, const char *name);
+int LOG4C_Init(const char *path, const char *name, int mode);
 void LOG4C_Term();
 
 void LOG4C_Lock();
 void LOG4C_UnLock();
 
-void LOG4C_SetLevel(LOG4C_LEVEL level);
+//level是0的话，表示禁止日志输出
+void LOG4C_SetLevel(int level);
 int LOG4C_GetLevel();
 
 const char * LOG4C_FormatCurTime(char* buf, int len, const char* format);
