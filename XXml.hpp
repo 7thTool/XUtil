@@ -166,4 +166,11 @@ namespace XUtil {
 	}
 }
 
+#define CFG_FROM_XML(cfg,xml,xmlflag) \
+	boost::property_tree::ptree* _##cfg##_ptr; \
+	boost::property_tree::ptree _##cfg##_ptree_; \
+	if (xmlflag == XUtil::XML_FLAG_PTREE) { _##cfg##_ptr = (boost::property_tree::ptree*)xml; } \
+	else { XUtil::cfg_from_xml(xml,xmlflag,_##cfg##_ptree_); _##cfg##_ptr = &_##cfg##_ptree_; } \
+	boost::property_tree::ptree& cfg = *_##cfg##_ptr;
+
 #endif//_H_XXML_HPP_

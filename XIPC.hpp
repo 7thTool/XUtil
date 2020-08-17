@@ -195,10 +195,12 @@ class XSharedMemory
 //     typedef boost::interprocess::managed_shared_memory::segment_manager segment_manager_t;
 // #endif
     typedef typename managed_t::segment_manager segment_manager_t;
-    typedef boost::interprocess::allocator<void, segment_manager_t> void_allocator;
-    typedef boost::interprocess::allocator<char, segment_manager_t> char_allocator;
-    typedef boost::interprocess::basic_string<char, std::char_traits<char>, char_allocator> char_string;
-    typedef boost::interprocess::allocator<char_string, segment_manager_t> char_string_allocator;
+    typedef typename boost::interprocess::allocator<void, segment_manager_t> void_allocator;
+    typedef typename boost::interprocess::allocator<char, segment_manager_t> char_allocator;
+    typedef typename boost::interprocess::basic_string<char, std::char_traits<char>, char_allocator> char_string;
+    typedef typename boost::interprocess::allocator<char_string, segment_manager_t> char_string_allocator;
+	typedef typename boost::interprocess::vector<char, char_allocator> char_vector;
+    typedef typename boost::interprocess::allocator<char_vector, segment_manager_t> char_vector_allocator;
 
   public:
     XSharedMemory()
@@ -272,7 +274,7 @@ class XSharedMemory
             segment_ptr_ = std::make_shared<managed_t>(boost::interprocess::open_or_create, segment_name_.c_str(), segment_size);
             //}
         }
-        catch (const std::exception &)
+        catch (...)
         {
             //
         }
