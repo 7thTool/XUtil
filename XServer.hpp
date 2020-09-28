@@ -2,7 +2,6 @@
 
 #include "XApp.hpp"
 #include "XService.hpp"
-#include "XLogger.hpp"
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
