@@ -192,7 +192,7 @@ inline static bool SameMonth(uint32_t olddate, uint32_t newdate)
 {
 	uint32_t oldmonths = DaysOfMonth(GetYear(olddate), GetMonth(olddate));
 	uint32_t newmonths = DaysOfMonth(GetYear(newdate), GetMonth(newdate));
-	return (oldmonths / 7) == (newmonths / 7);
+	return oldmonths == newmonths;
 }
 
 //同一季
@@ -321,17 +321,17 @@ inline static uint32_t NextWorkDay(uint32_t year, uint32_t month, uint32_t day, 
 	return MakeDate(d.year(), d.month(), d.day());
 }
 
-inline static uint32_t PrevMonth(uint32_t year, uint32_t month, uint32_t days)
+inline static uint32_t PrevMonth(uint32_t year, uint32_t month, uint32_t day, uint32_t months)
 {
-	boost::gregorian::date d(year, month, 0);
-	d -= boost::gregorian::months(month);
+	boost::gregorian::date d(year, month, day);
+	d -= boost::gregorian::months(months);
 	return MakeDate(d.year(), d.month(), d.day());
 }
 
-inline static uint32_t NextMonth(uint32_t year, uint32_t month, uint32_t days)
+inline static uint32_t NextMonth(uint32_t year, uint32_t month, uint32_t day, uint32_t months)
 {
-	boost::gregorian::date d(year, month, 0);
-	d += boost::gregorian::months(month);
+	boost::gregorian::date d(year, month, day);
+	d += boost::gregorian::months(months);
 	return MakeDate(d.year(), d.month(), d.day());
 }
 
@@ -367,14 +367,14 @@ inline static uint32_t PrevMonth(uint32_t date, uint32_t months)
 {
 	uint32_t year, month, day;
 	SplitDate(date, year, month, day);
-	return PrevMonth(year, month, months);
+	return PrevMonth(year, month, day, months);
 }
 
 inline static uint32_t NextMonth(uint32_t date, uint32_t months)
 {
 	uint32_t year, month, day;
 	SplitDate(date, year, month, day);
-	return NextMonth(year, month, months);
+	return NextMonth(year, month, day, months);
 }
 
 inline static void PrevDateTime(uint32_t& date, uint32_t& time, uint32_t secs)
