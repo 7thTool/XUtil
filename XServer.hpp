@@ -31,7 +31,7 @@ class XModuleServer : public XApp, public XService
 	{
 	}
 
-	bool start(char* xml, int xmlflag)
+	bool start(const char* xml, int xmlflag)
 	{
 		Base::init(xml, xmlflag);
 		return Service::start();

@@ -2,7 +2,7 @@
 
 namespace XUtil {
 
-		bool XApiEx::init(char *xml, int xmlflag)
+		bool XApiEx::init(const char *xml, int xmlflag)
 		{
 			XApi::init(xml, xmlflag);
 			if (work_path_.empty())
@@ -21,7 +21,7 @@ namespace XUtil {
 XApp::XApp() { _inst = this; }
 		XApp::~XApp() { }
 
-		bool XApp::init(char *xml, int xmlflag)
+		bool XApp::init(const char *xml, int xmlflag)
 		{
 			Base::init(xml, xmlflag);
 			boost::filesystem::path cur_path = boost::filesystem::current_path();

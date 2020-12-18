@@ -19,7 +19,7 @@ namespace XUtil
 		XApi() {}
 		~XApi() {}
 
-		bool init(char *xml, int xmlflag)
+		bool init(const char *xml, int xmlflag)
 		{
 			cfg_from_xml(xml, xmlflag, cfg_);
 			//boost::filesystem::path app_path = boost::dll::program_location();

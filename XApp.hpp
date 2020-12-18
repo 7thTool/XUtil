@@ -12,7 +12,7 @@ namespace XUtil
 	class XApiEx : public XApi
 	{
 	public:
-		bool init(char *xml, int xmlflag);
+		bool init(const char *xml, int xmlflag);
 	};
 
 	class XApp : public XApiEx
@@ -26,7 +26,7 @@ namespace XUtil
 		XApp();
 		~XApp();
 
-		bool init(char *xml, int xmlflag);
+		bool init(const char *xml, int xmlflag);
 		void term();
 	};
 }
