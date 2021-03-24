@@ -13,8 +13,8 @@ namespace XUtil {
     null_mutex() noexcept = default;
     ~null_mutex() = default;
 
-    null_mutex(const mutex&) = delete;
-    null_mutex& operator=(const mutex&) = delete;
+    null_mutex(const null_mutex&) = delete;
+    null_mutex& operator=(const null_mutex&) = delete;
 
     void lock() {}
     bool try_lock() noexcept { return true; }

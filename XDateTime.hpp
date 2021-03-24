@@ -179,6 +179,14 @@ inline static uint32_t WeeksPerMonth(uint32_t y, uint32_t m, uint32_t d)
 	return (days + (7 - 1)) / 7 - (first_days + (7 - 1)) / 7;
 }
 
+//差几天
+inline static int32_t DiffDays(uint32_t olddate, uint32_t newdate)
+{
+	uint32_t olddays = DaysOfDate(GetYear(olddate), GetMonth(olddate), GetDay(olddate));
+	uint32_t newdays = DaysOfDate(GetYear(newdate), GetMonth(newdate), GetDay(newdate));
+	return olddays - newdays;
+}
+
 //同一周
 inline static bool SameWeek(uint32_t olddate, uint32_t newdate)
 {
